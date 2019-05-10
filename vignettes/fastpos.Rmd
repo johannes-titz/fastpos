@@ -1,0 +1,106 @@
+---
+title: "Introducing fastpos"
+author: "Johannes Titz"
+date: "May, 2019"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{fastpos}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+This package provides a fast way to calculate the required sample size for a Pearson correlation to stabilize in the sequential framework of Schönbrodt and Perugini (2013; 2018). I assume that you have read the original paper or at least have an idea of how it works in principle. Essentially you want to find the sample size at which you can be sure that 1-$\alpha$ percent of many studies (e.g. 100k) would fall into a specified corridor of stability around an assumed population correlation and stay inside the corridor if you add more participants to your study. For instance, how many participants per study are required so that out of 100k studies, 90\% would fall into the region between .4 to .6 (a Pearson correlation) and not leave this region anymore when you add more participants (under the assumption that the population correlation is .5). This is also referred to as the point of stability.
+
+If you have found this page, I assume you either want (1) to calculate the point of stability for your own study or (2) to explore the method in general. If this is the case, read on and in one minute you will get what you want. Let us first load the package and set a seed for reproducibility:
+
+```{r setup}
+library(fastpos)
+set.seed(19950521)
+```
+
+In most cases you will just need the function **fastpos** which will you give you the points of stability for your specific parameters.
+
+Let us reproduce one example from Schönbrodt and Perugini's work (this should take only a couple of seconds on a modern CPU):
+
+```{r}
+fastpos(rho = .7, sample_size_min = 20, sample_size_max = 1000,
+        n_studies = 10000)
+```
+
+If you compare this with their original table or the data on github (https://github.com/nicebread/corEvol) the results should be fairly close.
+
+Note that **fastpos** will throw a warning if at least one study did not reach the corridor of stability with the maximum sample size. This happened in Schönbrodt and Perugini's work, but quite seldom. Still, it should be be avoided.
+
+```{r}
+fastpos(rho = .7, sample_size_min = 20, sample_size_max = 400,
+        n_studies = 10000)
+```
+
+In this case, do what the warning message suggests and increase the maximum sample size. Note that larger sample sizes are more resource intensive because the correlations are calculated in the reverse way (from the maximum sample size downwards). Thus, you usually would not like to increase the maximum sample size, unless the warning is thrown.
+
+If you need a different confidence level, just state it:
+
+```{r}
+fastpos(rho = .7, sample_size_min = 20, sample_size_max = 1000,
+        n_studies = 10000, confidence_levels = .85)
+```
+
+This has no effect on resource consumption because the time consuming part is to get the distribution, not calculating quantiles of the distribution.
+
+If you need a different precision level or even relative precision, specify it:
+
+```{r}
+fastpos(rho = c(.5, .7), sample_size_min = 20, sample_size_max = 2000,
+        n_studies = 10000, precision = .25, precision_rel = T)
+```
+
+As you can see in the output, the limits were set relatively to the population correlation. +-25\% of the population correlation.
+
+If you want to dig deeper, you can have a look at the functions that fastpos builds upon. **get_one_n** and **get_several_n** are the workhorses of the package. They call C++ functions to calculate correlations sequentially and they do it pretty fast (but you know that already, right?). A rawish approach would be to create a population with **create_pop** and pass it to **get_several_n**:
+
+```{r, fig.width = 6, fig.height = 4.2}
+pop <- create_pop(0.5, 1000000)
+critical_ns <- get_several_n(x_pop = pop[,1],
+                             y_pop = pop[,2],
+                             number_of_studies = 1000,
+                             sample_size_min = 20,
+                             sample_size_max = 1000,
+                             replace = T,
+                             lower_limit = 0.4,
+                             upper_limit = 0.6)
+hist(critical_ns, xlim = c(0, 1000), xlab = c("Critical sample size"),
+     main = "Histogram of critical sample sizes for rho = .5+-.1")
+quantile(critical_ns, c(.8, .9, .95))
+```
+
+Note that an error is not thrown if the corridor is not reached. It will simply return the maximum sample size. So pay careful attention if you work with this function and adjust the maximum sample size when necessary.
+
+The rest of the functions are essentially helping to set up a couple of things and then call **get_several_n**. 
+
+**find_pos** calls **get_several_n** and then calculates the quantiles for the specified confidence levels. It returns an informative summary and the individual critical sample sizes. If you are interested in working with the distribution of critical sample sizes you could also call this function.
+ 
+**create_pop** creates the population matrix by using **mvrnorm**. This is a much simpler way compared to Schönbrodt and Perugini's used functions, but the results do not seem to differ. If you are interested in how population parameters (e.g. skewness) affect the point of stability, you should rather refer to the population generating functions in Schönbrodt and Perugini's work.
+ 
+**run_one_simulation** does what it says, it runs one simulation for a specific population correlation. It first creates a population with **create_pop**, then calculates the limits of the corridor and then calls **find_pos**.
+
+As you can see, there is not really much to the sequential definition of stability, except for calculating billions of correlations :). This is done quite fast with the help of **Rcpp**.
+
+Let us finally reproduce Schönbrodt and Peruigini's quite famous, often cited table of the points of stability for the precision 0.1. We set the maximum sample size a bit higher, so we avoid studies where the corridor is never reached. Furthermore, we will reduce the number of studies to 10k so that it runs fairly quickly. But even if you increase the number of studies to 100k (as in the original article), it should only a couple of minutes, which is a speedup of more than 1000 compared to Schönbrodt and Perugini's algorithm.
+
+```{r}
+fastpos(rho = seq(.1, .7, .1), sample_size_max = 1600, n_studies = 10000)
+```
+
+So far, so good. If you are interested in this package, there is still some work to do and I am happy if you like to contribute. Specifically, at the moment, the code runs on a single core and in the future I would like to use RcppParallel to speed it up even further. This is rather of academic interest, as the functions are fast enough to find the point of stability for an individual study in a few seconds for most use cases. Indeed, I hope the package will be used this way -- quite similar to a power analysis for significance testing.
+
+# References
+Schönbrodt, F. D. & Perugini, M. (2013). At what sample size do correlations stabilize? *Journal of Research in Personality, 47*, 609-612. [https://doi.org/10.1016/j.jrp.2013.05.009]
+ 
+Schönbrodt, F. D. & Perugini, M. (2018) Corrigendum to “At what sample size do correlations stabilize?” [J. Res. Pers. 47 (2013) 609–612. https://doi.org/10.1016/j.jrp.2013.05.009]. *Journal of Research in Personality, 74*, 194. [https://doi.org/10.1016/j.jrp.2018.02.010]

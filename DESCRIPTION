@@ -1,0 +1,23 @@
+Package: fastpos
+Type: Package
+Title: Calculates required sample size for a Pearson correlation to "stabilize"
+Version: 0.1.0
+Date: 2019-04-17
+Authors@R: person("Johannes", "Titz", email = "johannes.titz@gmail.com",
+  role = c("aut", "cre", "cph"))
+Description: Finds the average required sample size ("point of stability") for a 
+    correlation to stabilize in Schoenbrodt and Perugini's definition of 
+    sequential stability. 
+License: GPL-3
+Imports: 
+    Rcpp (>= 1.0.1),
+    plyr,
+    MASS
+LinkingTo: Rcpp, RcppArmadillo,
+BugReports: https://github.com/johannes-titz/fastpos
+Encoding: UTF-8
+RoxygenNote: 6.1.1
+Suggests: 
+    knitr,
+    rmarkdown
+VignetteBuilder: knitr
