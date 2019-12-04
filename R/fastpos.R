@@ -95,18 +95,23 @@ find_pos <- function(pop, n_studies, sample_size_min, sample_size_max,
                        lower_limit, upper_limit)
   names(res) <- unlist(paste("study ", 1:length(res)))
   # TODO: exception handling
-  if (sample_size_max %in% res) {
-    cat("\nAt least one study did not reach the corridor of stability at a ",
-        "sample size of ", sample_size_max,
-        ".\nIncrease sample_size_max to solve the problem.", sep = "")
-  }
+  n_not_breached <- as.numeric((table(res)[as.character(sample_size_max)]))
+  n_not_breached <- ifelse(is.na(n_not_breached), 0, n_not_breached)
+  # if (sample_size_max %in% res) {
+  #   stop("\nAt least one study did not reach the corridor of stability at a ",
+  #       "sample size of ", sample_size_max,
+  #       ".\nIncrease sample_size_max to solve the problem.", sep = "")
+  # }
   thequantiles <- stats::quantile(res, confidence_levels)
   return(list(summary = c(rho_pop = rho_pop, thequantiles,
                           sample_size_min = sample_size_min,
                           sample_size_max = sample_size_max,
                           lower_limit=lower_limit,
                           upper_limit=upper_limit,
-                          n_studies = n_studies), n = res))
+                          n_studies = n_studies,
+                          n_not_breached = n_not_breached),
+              n = res
+              ))
 }
 
 #' Run simulation for one specific correlation.
@@ -164,21 +169,28 @@ run_one_simulation <- function(rho, sample_size_min = 20,
 #' fastpos(rho = 0.5)
 #' fastpos(rho = c(0.4, 0.5))
 #' @export
-fastpos <- function(rhos, sample_size_min = 20, sample_size_max = 1000,
-                            n_studies = 10000,
+fastpos <- function(rhos, sample_size_min = 20,
+                    sample_size_max = 1000,
+                            n_studies = 10000, pop_size = 1e6,
                             precision = 0.1, precision_rel = F,
                             confidence_levels = c(.8, .9, .95)) {
-  result <- lapply(rhos, run_one_simulation,
-                   sample_size_min = sample_size_min,
-                   sample_size_max = sample_size_max,
-                   n_studies = n_studies,
-                   precision = precision,
-                   precision_rel = precision_rel,
-                   confidence_levels = confidence_levels)
-
+  result <- mapply(run_one_simulation, rhos,
+                                  sample_size_max = sample_size_max,
+                                  #MoreArgs = list(
+                                  sample_size_min = sample_size_min,
+                                  n_studies = n_studies,
+                                  precision = precision,
+                                  precision_rel = precision_rel,
+                                  MoreArgs = list(confidence_levels = confidence_levels),
+                                  SIMPLIFY = F)
   summary <- lapply(result, function(x) x[[1]])
   summary <- plyr::ldply(summary)
   summary <- cbind(summary, precision, precision_rel)
+  sum_n_not_breached = sum(summary$n_not_breached)
+  if (sum_n_not_breached > 0){
+    cat(sum_n_not_breached," simulation[s] did not reach the corridor of stability",
+        ".\nIncrease sample_size_max to solve the problem.", sep = "")
+  }
   summary
 }
 
@@ -187,6 +199,6 @@ fastpos <- function(rhos, sample_size_min = 20, sample_size_max = 1000,
   packageStartupMessage("Welcome to fastpos")
 }
 
-.onUnload <- function (libpath) {
+.onUnload <- function(libpath) {
   library.dynam.unload("fastpos", libpath)
 }
