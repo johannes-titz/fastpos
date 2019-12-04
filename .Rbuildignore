@@ -3,3 +3,6 @@
 ^test.R$
 ^cran-comments.md$
 ^README\.Rmd$
+^todos.Rmd$
+^reproduce_schönbrodt.csv$
+^reste.R$
