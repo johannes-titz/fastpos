@@ -67,7 +67,7 @@ int simulate_one_pos(NumericVector x_pop,
   corr = float(n * sum_XY - sum_X * sum_Y)
     / sqrt((n * squareSum_X - sum_X * sum_X)
              * (n * squareSum_Y - sum_Y * sum_Y));
-  while (corr >= lower_limit & corr <= upper_limit & n > sample_size_min) {
+  while ((corr >= lower_limit) & (corr <= upper_limit) & (n > sample_size_min)) {
     // use formula for calculating correlation coefficient.
     sum_X -= X[n-1];
 
