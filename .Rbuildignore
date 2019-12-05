@@ -6,3 +6,8 @@
 ^todos.Rmd$
 ^reproduce_schönbrodt.csv$
 ^reste.R$
+^plot_n\.pdf$
+^plot_n\.RData$
+^sim_rel_prec10\.csv$
+^sim_rel_prec14\.csv$
+^sim_rel_prec33\.csv$
