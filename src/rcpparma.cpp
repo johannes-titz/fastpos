@@ -107,7 +107,7 @@ int simulate_one_pos(NumericVector x_pop,
 //' @return Vector of sample sizes at which corridor of stability was reached.
 //' @examples
 //' pop <- fastpos::create_pop(0.5, 1000000)
-//' simulate_pos(pop[,1], pop[,2], 1000, 20, 1000, TRUE, 0.4, 0.6)
+//' simulate_pos(pop[,1], pop[,2], 100, 20, 1000, TRUE, 0.4, 0.6)
 //' @export
 // [[Rcpp::export]]
 NumericVector simulate_pos(NumericVector x_pop,
