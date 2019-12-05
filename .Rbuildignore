@@ -13,3 +13,4 @@
 ^sim_rel_prec33\.csv$
 ^\.travis\.yml$
 ^codecov\.yml$
+^cran-comments\.md$
