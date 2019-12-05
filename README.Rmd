@@ -57,7 +57,7 @@ You can obviously parallelize the process, which will be especially useful if yo
 
 If you want to dig deeper, you can have a look at the functions that *find_critical_pos* builds upon. **simulate_pos** is the workhorse of the package. It calls a C++ function to calculate correlations sequentially and it does this pretty fast (but you know that already, right?). A rawish approach would be to create a population with **create_pop** and pass it to **simulate_pos**:
 
-```{r}
+```{r, fig.width = 6, fig.height = 4.2}
 pop <- create_pop(0.5, 1000000)
 pos <- simulate_pos(x_pop = pop[,1],
                     y_pop = pop[,2],
