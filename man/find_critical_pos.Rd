@@ -9,8 +9,8 @@ find_critical_pos(
   precision = 0.1,
   precision_rel = FALSE,
   sample_size_min = 20,
-  n_studies = 10000,
   sample_size_max = 1000,
+  n_studies = 10000,
   confidence_levels = c(0.8, 0.9, 0.95),
   pop_size = 1e+06
 )
@@ -27,9 +27,9 @@ relative rho+-rho*precision), boolean (defaults to FALSE).}
 
 \item{sample_size_min}{Minimum sample size for each study (defaults to 20).}
 
-\item{n_studies}{Number of studies to run for each rho (defaults to 10e3).}
-
 \item{sample_size_max}{Maximum sample size for each study (defaults to 1e3).}
+
+\item{n_studies}{Number of studies to run for each rho (defaults to 10e3).}
 
 \item{confidence_levels}{Confidence levels for point of stability. This
 corresponds to the quantile of the distribution of all found critical

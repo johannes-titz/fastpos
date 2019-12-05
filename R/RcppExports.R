@@ -34,7 +34,7 @@ simulate_one_pos <- function(x_pop, y_pop, index_pop, sample_size_min, sample_si
 #' @return Vector of sample sizes at which corridor of stability was reached.
 #' @examples
 #' pop <- fastpos::create_pop(0.5, 1000000)
-#' simulate_pos(pop[,1], pop[,2], 1000, 20, 1000, TRUE, 0.4, 0.6)
+#' simulate_pos(pop[,1], pop[,2], 100, 20, 1000, TRUE, 0.4, 0.6)
 #' @export
 simulate_pos <- function(x_pop, y_pop, number_of_studies, sample_size_min, sample_size_max, replace, lower_limit, upper_limit) {
     .Call('_fastpos_simulate_pos', PACKAGE = 'fastpos', x_pop, y_pop, number_of_studies, sample_size_min, sample_size_max, replace, lower_limit, upper_limit)

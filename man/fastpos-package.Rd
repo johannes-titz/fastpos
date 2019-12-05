@@ -4,11 +4,11 @@
 \name{fastpos-package}
 \alias{fastpos}
 \alias{fastpos-package}
-\title{fastpos: Finds the critical sequential point of stability for a Pearson correlation}
+\title{fastpos: Finds the Critical Sequential Point of Stability for a Pearson Correlation}
 \description{
 Finds the critical sample size ("point of stability") for a 
     correlation to stabilize in Schoenbrodt and Perugini's definition of 
-    sequential stability.
+    sequential stability (see <doi:10.1016/j.jrp.2013.05.009>).
 }
 \details{
 In most cases you will just need the function \code{\link{find_critical_pos}}
