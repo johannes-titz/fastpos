@@ -31,7 +31,7 @@ This package provides a fast algorithm to calculate the required sample size for
 You can install the development version from [GitHub](https://github.com/) with devtools (and vignettes build, this takes a couple of seconds):
 
 ```{r echo=TRUE, message=FALSE, warning=FALSE, paged.print=FALSE, eval=FALSE}
-devtools::install_github("johannes-titz/passt", build_vignettes = TRUE)
+devtools::install_github("johannes-titz/fastpos", build_vignettes = TRUE)
 ```
 
 ## Using *fastpos*

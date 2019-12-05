@@ -40,7 +40,7 @@ You can install the development version from
 takes a couple of seconds):
 
 ``` r
-devtools::install_github("johannes-titz/passt", build_vignettes = TRUE)
+devtools::install_github("johannes-titz/fastpos", build_vignettes = TRUE)
 ```
 
 ## Using *fastpos*
@@ -117,8 +117,8 @@ pos <- simulate_pos(x_pop = pop[,1],
                     replace = T,
                     lower_limit = 0.4,
                     upper_limit = 0.6)
-hist(pos, xlim = c(0, 1000), xlab = c("Critical sample size"),
-     main = "Histogram of critical sample sizes for rho = .5+-.1")
+hist(pos, xlim = c(0, 1000), xlab = c("Point of stability"),
+     main = "Histogram of points of stability for rho = .5+-.1")
 ```
 
 <img src="man/figures/README-unnamed-chunk-4-1.png" width="100%" />
