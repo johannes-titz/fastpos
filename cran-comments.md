@@ -1,16 +1,17 @@
 ## Test environments
-* local arch linux install, R 3.1.2
-* win-builder (devel and release)
+* local Arch GNU/Linux install, R 3.6.1
+* ubuntu 16.04 (on travis-ci), R 3.6.1
+* win-builder (devel, release)
 
 ## R CMD check results
 There were no ERRORs or WARNINGs. 
 
-There was 1 NOTE:
+There was 1 NOTE on win-builder release and devel:
 
-* checking dependencies in R code ... NOTE
-  Namespace in Imports field not imported from: 'R6'
+* checking CRAN incoming feasibility ... NOTE
+  Maintainer: 'Johannes Titz <johannes.titz@gmail.com>'
 
-  R6 is a build-time dependency.
+  As I understand it this is just a reminder for CRAN maintainers.
 
 ## Downstream dependencies
 There are no downstream dependencies
