@@ -5,6 +5,10 @@
 #include <RcppArmadilloExtensions/sample.h>
 using namespace Rcpp;
 
+// [[Rcpp::depends(RcppProgress)]]
+#include <progress.hpp>
+#include <progress_bar.hpp>
+//
 // via the depends attribute we tell Rcpp to create hooks for
 // RcppArmadillo so that the build process will know what to do
 //
@@ -13,19 +17,18 @@ using namespace Rcpp;
 //' Run a single sequential study to find a critical n.
 //' @param x_pop First vector of population.
 //' @param y_pop Second vector of population.
-//' @param index_pop Vector from 1:length(x_pop) (more efficient than to create).
+//' @param index_pop Vector from 1:length(x_pop) (more efficient than to
+//'   create).
 //' @param lower_limit Lower limit of corridor of stability.
 //' @param upper_limit Upper limit of corridor of stability.
 //' @param replace Whether drawing samples is with replacement or not.
 //' @param sample_size_max How many participants to draw at maximum.
-//' @param sample_size_min Minimum sample size to start in corridor of stability.
+//' @param sample_size_min Minimum sample size to start in corridor of
+//'   stability.
 //' @return Sample size where corridor of stability is reached.
-//' @examples
-//' pop <- fastpos::create_pop(0.5, 100000)
-//' get_one_n(pop[,1], pop[,2], 1:nrow(pop), 1000, TRUE, 0.4, 0.6, 20)
-//' @export
+//' @noRd
 // [[Rcpp::export]]
-int get_one_n(NumericVector x_pop,
+int simulate_one_pos(NumericVector x_pop,
               NumericVector y_pop,
               NumericVector index_pop,
               int sample_size_min,
@@ -34,7 +37,8 @@ int get_one_n(NumericVector x_pop,
               float lower_limit,
               float upper_limit){
 
-  NumericVector index = RcppArmadillo::sample(index_pop, sample_size_max, replace);
+  NumericVector index = RcppArmadillo::sample(index_pop, sample_size_max,
+                                              replace);
 
   NumericVector X = x_pop[index];
   NumericVector Y = y_pop[index];
@@ -87,7 +91,11 @@ int get_one_n(NumericVector x_pop,
   return n;
 }
 
-//' Run several sequential studies to find several critical n.
+//' Simulate several points of stability
+//'
+//' Runs several simulations and returns the points of stability, which can then
+//' be further processed to calculate the critical point of stability.
+//'
 //' @param x_pop First vector of population.
 //' @param y_pop Second vector of population.
 //' @param lower_limit Lower limit of corridor of stability.
@@ -99,29 +107,36 @@ int get_one_n(NumericVector x_pop,
 //' @return Vector of sample sizes at which corridor of stability was reached.
 //' @examples
 //' pop <- fastpos::create_pop(0.5, 1000000)
-//' get_several_n(pop[,1], pop[,2], 1000, 20, 1000, TRUE, 0.4, 0.6)
+//' simulate_pos(pop[,1], pop[,2], 1000, 20, 1000, TRUE, 0.4, 0.6)
 //' @export
 // [[Rcpp::export]]
-NumericVector get_several_n(NumericVector x_pop,
-                            NumericVector y_pop,
-                            int number_of_studies,
-                            int sample_size_min,
-                            int sample_size_max,
-                            bool replace,
-                            float lower_limit,
-                            float upper_limit){
+NumericVector simulate_pos(NumericVector x_pop,
+                           NumericVector y_pop,
+                           int number_of_studies,
+                           int sample_size_min,
+                           int sample_size_max,
+                           bool replace,
+                           float lower_limit,
+                           float upper_limit){
   NumericVector ret(number_of_studies);
   int npop = x_pop.size();
   NumericVector index_pop(npop);
   for (int i = 0; i < npop; i++){
     index_pop[i] = i;
   }
+  Rcout << std::endl;
+  Progress p(number_of_studies, true);
   for (int k = 0; k < number_of_studies; k++) {
     if (k % 10000 == 0) {
-      Rcpp::checkUserInterrupt();
+      checkUserInterrupt();
+
+      //Rcout << "#";
     }
-    ret[k] = get_one_n(x_pop, y_pop, index_pop, sample_size_min,
-                       sample_size_max, replace, lower_limit, upper_limit);
+    p.increment();
+    ret[k] = simulate_one_pos(x_pop, y_pop, index_pop, sample_size_min,
+                              sample_size_max, replace, lower_limit,
+                              upper_limit);
   }
+  Rcout << std::endl;
   return(ret);
 }
