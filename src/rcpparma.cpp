@@ -140,4 +140,3 @@ NumericVector simulate_pos(NumericVector x_pop,
   Rcout << std::endl;
   return(ret);
 }
-//
