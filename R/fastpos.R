@@ -126,8 +126,8 @@ find_one_critical_pos <- function(rho, sample_size_min = 20,
 #' find_critical_pos(rho = c(0.4, 0.5))
 #' @export
 find_critical_pos <- function(rhos, precision = 0.1, precision_rel = FALSE,
-                              sample_size_min = 20, n_studies = 10000,
-                              sample_size_max = 1000,
+                              sample_size_min = 20, sample_size_max = 1000,
+                              n_studies = 10000,
                               confidence_levels = c(.8, .9, .95),
                               pop_size = 1e6) {
   result <- mapply(find_one_critical_pos, rhos,
