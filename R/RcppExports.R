@@ -4,22 +4,25 @@
 #' Run a single sequential study to find a critical n.
 #' @param x_pop First vector of population.
 #' @param y_pop Second vector of population.
-#' @param index_pop Vector from 1:length(x_pop) (more efficient than to create).
+#' @param index_pop Vector from 1:length(x_pop) (more efficient than to
+#'   create).
 #' @param lower_limit Lower limit of corridor of stability.
 #' @param upper_limit Upper limit of corridor of stability.
 #' @param replace Whether drawing samples is with replacement or not.
 #' @param sample_size_max How many participants to draw at maximum.
-#' @param sample_size_min Minimum sample size to start in corridor of stability.
+#' @param sample_size_min Minimum sample size to start in corridor of
+#'   stability.
 #' @return Sample size where corridor of stability is reached.
-#' @examples
-#' pop <- fastpos::create_pop(0.5, 100000)
-#' get_one_n(pop[,1], pop[,2], 1:nrow(pop), 1000, TRUE, 0.4, 0.6, 20)
-#' @export
-get_one_n <- function(x_pop, y_pop, index_pop, sample_size_min, sample_size_max, replace, lower_limit, upper_limit) {
-    .Call('_fastpos_get_one_n', PACKAGE = 'fastpos', x_pop, y_pop, index_pop, sample_size_min, sample_size_max, replace, lower_limit, upper_limit)
+#' @noRd
+simulate_one_pos <- function(x_pop, y_pop, index_pop, sample_size_min, sample_size_max, replace, lower_limit, upper_limit) {
+    .Call('_fastpos_simulate_one_pos', PACKAGE = 'fastpos', x_pop, y_pop, index_pop, sample_size_min, sample_size_max, replace, lower_limit, upper_limit)
 }
 
-#' Run several sequential studies to find several critical n.
+#' Simulate several points of stability
+#'
+#' Runs several simulations and returns the points of stability, which can then
+#' be further processed to calculate the critical point of stability.
+#'
 #' @param x_pop First vector of population.
 #' @param y_pop Second vector of population.
 #' @param lower_limit Lower limit of corridor of stability.
@@ -31,9 +34,9 @@ get_one_n <- function(x_pop, y_pop, index_pop, sample_size_min, sample_size_max,
 #' @return Vector of sample sizes at which corridor of stability was reached.
 #' @examples
 #' pop <- fastpos::create_pop(0.5, 1000000)
-#' get_several_n(pop[,1], pop[,2], 1000, 20, 1000, TRUE, 0.4, 0.6)
+#' simulate_pos(pop[,1], pop[,2], 1000, 20, 1000, TRUE, 0.4, 0.6)
 #' @export
-get_several_n <- function(x_pop, y_pop, number_of_studies, sample_size_min, sample_size_max, replace, lower_limit, upper_limit) {
-    .Call('_fastpos_get_several_n', PACKAGE = 'fastpos', x_pop, y_pop, number_of_studies, sample_size_min, sample_size_max, replace, lower_limit, upper_limit)
+simulate_pos <- function(x_pop, y_pop, number_of_studies, sample_size_min, sample_size_max, replace, lower_limit, upper_limit) {
+    .Call('_fastpos_simulate_pos', PACKAGE = 'fastpos', x_pop, y_pop, number_of_studies, sample_size_min, sample_size_max, replace, lower_limit, upper_limit)
 }
 

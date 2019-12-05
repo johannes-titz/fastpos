@@ -4,43 +4,18 @@
 \name{fastpos-package}
 \alias{fastpos}
 \alias{fastpos-package}
-\title{fastpos: Calculates required sample size for a Pearson correlation to "stabilize"}
+\title{fastpos: Finds the critical sequential point of stability for a Pearson correlation}
 \description{
-Finds the average required sample size ("point of stability") for a 
+Finds the critical sample size ("point of stability") for a 
     correlation to stabilize in Schoenbrodt and Perugini's definition of 
     sequential stability.
 }
 \details{
-In most cases you will just need the function \code{\link{fastpos}}which will
-you give you the points of stability for your specific parameters. If you are
-interested in more complicated analysis you might want to look at the
-functions that fastpos builds upon:
-
-\code{\link{get_one_n}} and \code{\link{get_several_n}} are the workhorse of
-the package. They call C++ functions to calculate correlations sequentially
-and they do it pretty fast, thus fastpos.
-
-\code{\link{find_pos}} calls \code{\link{get_several_n}} and then calculates
-the quantiles for the specified confidence levels. It returns an informative
-summary and the individual critical sample sizes. If you are interested in
-working with the distribution of critical sample sizes (instead of just the
-point of stability) you could use this function.
-
-\code{\link{create_pop}} creates the population matrix by using mvrnorm. This
-is a much simpler way compared to Schönbrodt and Perugini's used functions,
-but the results do not seem to be different. If you are interested in how
-population parameters (e.g. skewness) affect the point of stability, you
-should rather refer to the functions in Schönbrodt and Perugini's work.
-
-\code{\link{run_one_simulation}} does what it says, it runs one simulation
-for a specific population correlation. It first creates a population
-(\code{\link{create_pop}}), then calculates the limits of the corridor and
-then calls \code{\link{find_pos}}.
-
-\code{\link{fastpos}} simply calls run_one_simulation several times if you
-specify several population correlations. One could also call it
-run_several_simulations, but the main function of a package is conveniently
-called the same as the package.
+In most cases you will just need the function \code{\link{find_critical_pos}}
+which will you give you the critical point of stability for your specific
+parameters. If you are interested in more complicated analysis you might want
+to look at the function \code{\link{simulate_pos}}, which is a C++
+functions to calculate correlations and return points of stability.
 }
 \references{
 Schönbrodt, F. D. & Perugini, M. (2013). At what sample size do
@@ -60,7 +35,7 @@ Useful links:
 
 }
 \author{
-\strong{Maintainer}: Johannes Titz \email{johannes.titz@gmail.com}
+\strong{Maintainer}: Johannes Titz \email{johannes.titz@gmail.com} [copyright holder]
 
 }
 \keyword{internal}

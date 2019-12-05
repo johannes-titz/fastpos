@@ -6,9 +6,9 @@
 
 using namespace Rcpp;
 
-// get_one_n
-int get_one_n(NumericVector x_pop, NumericVector y_pop, NumericVector index_pop, int sample_size_min, int sample_size_max, bool replace, float lower_limit, float upper_limit);
-RcppExport SEXP _fastpos_get_one_n(SEXP x_popSEXP, SEXP y_popSEXP, SEXP index_popSEXP, SEXP sample_size_minSEXP, SEXP sample_size_maxSEXP, SEXP replaceSEXP, SEXP lower_limitSEXP, SEXP upper_limitSEXP) {
+// simulate_one_pos
+int simulate_one_pos(NumericVector x_pop, NumericVector y_pop, NumericVector index_pop, int sample_size_min, int sample_size_max, bool replace, float lower_limit, float upper_limit);
+RcppExport SEXP _fastpos_simulate_one_pos(SEXP x_popSEXP, SEXP y_popSEXP, SEXP index_popSEXP, SEXP sample_size_minSEXP, SEXP sample_size_maxSEXP, SEXP replaceSEXP, SEXP lower_limitSEXP, SEXP upper_limitSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -20,13 +20,13 @@ BEGIN_RCPP
     Rcpp::traits::input_parameter< bool >::type replace(replaceSEXP);
     Rcpp::traits::input_parameter< float >::type lower_limit(lower_limitSEXP);
     Rcpp::traits::input_parameter< float >::type upper_limit(upper_limitSEXP);
-    rcpp_result_gen = Rcpp::wrap(get_one_n(x_pop, y_pop, index_pop, sample_size_min, sample_size_max, replace, lower_limit, upper_limit));
+    rcpp_result_gen = Rcpp::wrap(simulate_one_pos(x_pop, y_pop, index_pop, sample_size_min, sample_size_max, replace, lower_limit, upper_limit));
     return rcpp_result_gen;
 END_RCPP
 }
-// get_several_n
-NumericVector get_several_n(NumericVector x_pop, NumericVector y_pop, int number_of_studies, int sample_size_min, int sample_size_max, bool replace, float lower_limit, float upper_limit);
-RcppExport SEXP _fastpos_get_several_n(SEXP x_popSEXP, SEXP y_popSEXP, SEXP number_of_studiesSEXP, SEXP sample_size_minSEXP, SEXP sample_size_maxSEXP, SEXP replaceSEXP, SEXP lower_limitSEXP, SEXP upper_limitSEXP) {
+// simulate_pos
+NumericVector simulate_pos(NumericVector x_pop, NumericVector y_pop, int number_of_studies, int sample_size_min, int sample_size_max, bool replace, float lower_limit, float upper_limit);
+RcppExport SEXP _fastpos_simulate_pos(SEXP x_popSEXP, SEXP y_popSEXP, SEXP number_of_studiesSEXP, SEXP sample_size_minSEXP, SEXP sample_size_maxSEXP, SEXP replaceSEXP, SEXP lower_limitSEXP, SEXP upper_limitSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -38,14 +38,14 @@ BEGIN_RCPP
     Rcpp::traits::input_parameter< bool >::type replace(replaceSEXP);
     Rcpp::traits::input_parameter< float >::type lower_limit(lower_limitSEXP);
     Rcpp::traits::input_parameter< float >::type upper_limit(upper_limitSEXP);
-    rcpp_result_gen = Rcpp::wrap(get_several_n(x_pop, y_pop, number_of_studies, sample_size_min, sample_size_max, replace, lower_limit, upper_limit));
+    rcpp_result_gen = Rcpp::wrap(simulate_pos(x_pop, y_pop, number_of_studies, sample_size_min, sample_size_max, replace, lower_limit, upper_limit));
     return rcpp_result_gen;
 END_RCPP
 }
 
 static const R_CallMethodDef CallEntries[] = {
-    {"_fastpos_get_one_n", (DL_FUNC) &_fastpos_get_one_n, 8},
-    {"_fastpos_get_several_n", (DL_FUNC) &_fastpos_get_several_n, 8},
+    {"_fastpos_simulate_one_pos", (DL_FUNC) &_fastpos_simulate_one_pos, 8},
+    {"_fastpos_simulate_pos", (DL_FUNC) &_fastpos_simulate_pos, 8},
     {NULL, NULL, 0}
 };
 
