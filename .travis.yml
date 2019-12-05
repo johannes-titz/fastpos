@@ -3,4 +3,4 @@
 language: R
 cache: packages
 after_success:
-    - Rscript -e 'covr::codecov()'
+    - Rscript -e 'covr::codecov(token = "dc248e2b-a7b9-4b82-ba1f-97067c2a1b43")'
