@@ -2,3 +2,10 @@ inst/doc
 .Rhistory
 .RData
 .Rproj.user
+todos.Rmd
+test.R
+sim_rel_prec*.csv
+reste.R
+reproduce_schönbrodt.csv
+plot_n.pdf
+plot_n.RData
