@@ -14,3 +14,7 @@
 ^\.travis\.yml$
 ^codecov\.yml$
 ^cran-comments\.md$
+^corEvol$
+^paper.md$
+^library.bib$
+^README_cache$
