@@ -67,6 +67,11 @@ int simulate_one_pos(NumericVector x_pop,
   corr = float(n * sum_XY - sum_X * sum_Y)
     / sqrt((n * squareSum_X - sum_X * sum_X)
              * (n * squareSum_Y - sum_Y * sum_Y));
+  // if the correlation is outside for the whole sample, there is no
+  // point of stability (sample size is too small)
+  if ((corr < lower_limit) | (corr > upper_limit)) {
+    n = NA_INTEGER;
+  } else {
   while ((corr >= lower_limit) & (corr <= upper_limit) & (n > sample_size_min)) {
     // use formula for calculating correlation coefficient.
     sum_X -= X[n-1];
@@ -87,6 +92,7 @@ int simulate_one_pos(NumericVector x_pop,
                * (n * squareSum_Y - sum_Y * sum_Y));
                // now subtract the last value
 
+  }
   }
   return n;
 }
@@ -110,7 +116,7 @@ int simulate_one_pos(NumericVector x_pop,
 //' simulate_pos(pop[,1], pop[,2], 100, 20, 1000, TRUE, 0.4, 0.6)
 //' @export
 // [[Rcpp::export]]
-NumericVector simulate_pos(NumericVector x_pop,
+IntegerVector simulate_pos(NumericVector x_pop,
                            NumericVector y_pop,
                            int number_of_studies,
                            int sample_size_min,
@@ -118,25 +124,21 @@ NumericVector simulate_pos(NumericVector x_pop,
                            bool replace,
                            float lower_limit,
                            float upper_limit){
-  NumericVector ret(number_of_studies);
+  IntegerVector ret(number_of_studies);
   int npop = x_pop.size();
   NumericVector index_pop(npop);
   for (int i = 0; i < npop; i++){
     index_pop[i] = i;
   }
-  Rcout << std::endl;
   Progress p(number_of_studies, true);
   for (int k = 0; k < number_of_studies; k++) {
     if (k % 10000 == 0) {
       checkUserInterrupt();
-
-      //Rcout << "#";
     }
     p.increment();
     ret[k] = simulate_one_pos(x_pop, y_pop, index_pop, sample_size_min,
                               sample_size_max, replace, lower_limit,
                               upper_limit);
   }
-  Rcout << std::endl;
   return(ret);
 }

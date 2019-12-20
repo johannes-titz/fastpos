@@ -1,8 +1,7 @@
 set.seed(20191204)
 cpos <- find_critical_pos(rho = c(.1, .7), sample_size_max = 1000,
                           n_studies = 10000)
-
-cpos_old <- read.csv("cpos.csv")
+cpos_old <- read.csv("cpos2.csv")
 test_that("previous values can be reproduced", {
   expect_equal(cpos, cpos_old, check.attributes = F)
 })

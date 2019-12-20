@@ -83,10 +83,10 @@ find_one_critical_pos <- function(rho, sample_size_min = 20,
   res <- simulate_pos(x, y, n_studies, sample_size_min, sample_size_max, T,
                        lower_limit, upper_limit)
   names(res) <- unlist(paste("study ", 1:length(res)))
-  n_not_breached <- as.numeric((table(res)[as.character(sample_size_max)]))
-  n_not_breached <- ifelse(is.na(n_not_breached), 0, n_not_breached)
+  n_not_breached <- sum(is.na(res))#as.numeric((table(res)[as.character(sample_size_max)]))
+  #n_not_breached <- ifelse(is.na(n_not_breached), 0, n_not_breached)
   # calc critical pos
-  thequantiles <- stats::quantile(res, confidence_levels)
+  thequantiles <- stats::quantile(res, confidence_levels, na.rm = T)
   return(list(summary = c(rho_pop = rho_pop, thequantiles,
                           sample_size_min = sample_size_min,
                           sample_size_max = sample_size_max,

@@ -25,7 +25,7 @@ BEGIN_RCPP
 END_RCPP
 }
 // simulate_pos
-NumericVector simulate_pos(NumericVector x_pop, NumericVector y_pop, int number_of_studies, int sample_size_min, int sample_size_max, bool replace, float lower_limit, float upper_limit);
+IntegerVector simulate_pos(NumericVector x_pop, NumericVector y_pop, int number_of_studies, int sample_size_min, int sample_size_max, bool replace, float lower_limit, float upper_limit);
 RcppExport SEXP _fastpos_simulate_pos(SEXP x_popSEXP, SEXP y_popSEXP, SEXP number_of_studiesSEXP, SEXP sample_size_minSEXP, SEXP sample_size_maxSEXP, SEXP replaceSEXP, SEXP lower_limitSEXP, SEXP upper_limitSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
