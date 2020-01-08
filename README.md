@@ -13,24 +13,35 @@ coverage](https://codecov.io/gh/johannes-titz/fastpos/branch/master/graph/badge.
 status](https://www.r-pkg.org/badges/version/fastpos)](https://CRAN.R-project.org/package=fastpos)
 <!-- badges: end -->
 
-This package provides a fast algorithm to calculate the required sample
-size for a Pearson correlation to stabilize in the sequential framework
-of Schönbrodt and Perugini (2013; 2018). Basically, you want to find the
-sample size at which you can be sure that 1-α percent of many studies
-would fall into a specified corridor of stability around an assumed
-population correlation and stay inside the corridor if you add more
-participants to your study. For instance, how many participants per
-study are required so that out of 100k studies, 90% would fall into the
-region between .4 to .6 (a Pearson correlation) and not leave this
-region anymore when you add more participants (under the assumption that
-the population correlation is .5). This is also referred to as the
-*critical point of stability*. The approach is related to accuracy in
-parameter estimation (AIPE) and can be seen as an alternative to power
-analysis. The package fastpos provides a simple way to use the method
-for sample size planning, but also for simulation studies. Compared to
-the original implementation by Schönbrodt and Perugini (see
-<https://github.com/nicebread/corEvol>), fastpos is much faster and more
-user-friendly.
+The R package *fastpos* provides a fast algorithm to calculate the
+required sample size for a Pearson correlation to stabilize in a
+sequential framework \[@schonbrodt2013;@schonbrodt2018\]. Basically, one
+wants to find the sample size at which one can be sure that 1-α percent
+of many studies would fall into a specified corridor of stability around
+an assumed population correlation and stay inside the corridor if more
+more participants are added to the study. For instance, *how many*
+participants per study are required so that out of 100k studies, 90%
+would fall into the region between .4 to .6 (a Pearson correlation) and
+not leave this region anymore when more participants are added (under
+the assumption that the population correlation is .5). This sample size
+is also referred to as the *critical point of stability* for the
+specific parameters.
+
+The approach is related to accuracy in parameter estimation \[AIPE, e.g.
+@maxwell2008\] and as such can be seen as an alternative to power
+analysis. In contrast to AIPE, the concept of *stability* incorporates
+the idea of sequentially adding participants to a study. Although the
+approach is young, it already attracted a lot of interest in the
+psychological research community, which is evident in over 600 citations
+of the original publication \[@schonbrodt2013\]. To date there exists no
+easy way to use sequential stability for individual sample size planning
+because there is no analytical solution to the problem and a simulation
+approach is comptutationally expensive. The package *fastpos* resolves
+this issue by speeding up the calculation of correlations. The algorithm
+runs more than 100 times faster than the original implementation, paving
+the way for a wider usage of the *stability* approach. The algorithm
+runs more than 100 times faster than the original implementation, paving
+the way for a wider usage of the *stability* approach.
 
 ## Installation
 
@@ -107,7 +118,6 @@ the package. It calls a C++ function to calculate correlations
 sequentially and it does this pretty fast (but you know that already,
 right?). A rawish approach would be to create a population with
 **create\_pop** and pass it to **simulate\_pos**:
-<!-- , out.width = "600px" -->
 
 ``` r
 pop <- create_pop(0.5, 1000000)
@@ -126,9 +136,9 @@ hist(pos, xlim = c(0, 1000), xlab = c("Point of stability"),
 ![](man/figures/README-unnamed-chunk-5-1.png)<!-- -->
 
 ``` r
-quantile(pos, c(.8, .9, .95))
-#>    80%    90%    95% 
-#> 142.00 205.00 274.05
+quantile(pos, c(.8, .9, .95), na.rm = T)
+#> 80% 90% 95% 
+#> 142 205 274
 ```
 
 Note that no warning message appears if the corridor is not reached. It
@@ -143,13 +153,13 @@ population parameters (e.g. skewness) affect the point of stability, you
 should rather refer to the population generating functions in Schönbrodt
 and Perugini’s work.
 
-## How fast is fastpos?
+## How fast is *fastpos*?
 
 In the introduction I boldly claimed that fastpos is much faster than
 the original implementation of Schönbrodt and Perugini (corEvol). The
 difference is so big that it should suffice to give a rough benchmark
 with the following parameters: rho = .1, sample\_size\_max = 1000,
-sample\_size\_min = 20, n\_studies = 1000.
+sample\_size\_min = 20, n\_studies = 10000.
 
 Note that corEvol was written for a simulation study and thus cannot be
 simply called via a function. Furthermore, a simulation run takes a lot
@@ -158,114 +168,39 @@ to experiment with the benchmark, I have forked the original corEvol
 repository and made a benchmark branch (note that this will only work on
 GNU/Linux, since here I am using git through the bash):
 
-    #> Already up to date.
+``` bash
+git -C corEvol pull || git clone --single-branch --branch benchmark https://github.com/johannes-titz/corEvol
+#> Already up to date.
+```
 
 For corEvol two files are sourced for the benchmark. The first is
 generating the simulations and the second is calculating the critical
-point of stability.
+point of stability. I turned off all messages produced by these source
+files, except for the report of the critical point of stability – to
+show that is produces the same result as fastpos.
 
-``` r
-library(microbenchmark)
-setwd("../corEvol")
-corevol <- function(){
-  source("01-simdata.R")
-  source("02-analyse.R")
-}
-bm <- microbenchmark(corevol = corevol(),
-                     fastpos = find_critical_pos(rho = .1,
-                                                 sample_size_max = 1000,
-                                                 n_studies = 1000),
-                     times = 10)
-#> 
-#> Attaching package: 'dplyr'
-#> The following objects are masked from 'package:stats':
-#> 
-#>     filter, lag
-#> The following objects are masked from 'package:base':
-#> 
-#>     intersect, setdiff, setequal, union
-#> Loading required package: foreach
-#> Loading required package: iterators
-#> Loading required package: parallel
-#> 
-#> N = 1e+06 , k = 2 , 8 Iterations, 1 Factors, RMSR r = 0 
-#> Target correlation rho = 0.1 ; obtained correlation = 0.1[1] "Analyzing rho = 0.1"
-#>   rho 0.8_0.1 0.9_0.1 0.95_0.1
-#> 1 0.1     280     385      506
-#> 
-#> N = 1e+06 , k = 2 , 17 Iterations, 1 Factors, RMSR r = 0 
-#> Target correlation rho = 0.1 ; obtained correlation = 0.1[1] "Analyzing rho = 0.1"
-#>   rho 0.8_0.1 0.9_0.1 0.95_0.1
-#> 1 0.1     284     402      511
-#> 
-#> 
-#> [1] "Analyzing rho = 0.1"
-#>   rho 0.8_0.1 0.9_0.1 0.95_0.1
-#> 1 0.1     259     376      481
-#> 
-#> 
-#> 
-#> 
-#> 
-#> 
-#> 
-#> 
-#> [1] "Analyzing rho = 0.1"
-#>   rho 0.8_0.1 0.9_0.1 0.95_0.1
-#> 1 0.1     279     389      510
-#> [1] "Analyzing rho = 0.1"
-#>   rho 0.8_0.1 0.9_0.1 0.95_0.1
-#> 1 0.1     284     402      511
-#> [1] "Analyzing rho = 0.1"
-#>   rho 0.8_0.1 0.9_0.1 0.95_0.1
-#> 1 0.1     284     402      511
-#> 
-#> 
-#> 
-#> 
-#> 
-#> 
-#> [1] "Analyzing rho = 0.1"
-#>   rho 0.8_0.1 0.9_0.1 0.95_0.1
-#> 1 0.1     245     369      478
-#> 
-#> 
-#> [1] "Analyzing rho = 0.1"
-#>   rho 0.8_0.1 0.9_0.1 0.95_0.1
-#> 1 0.1     259     376      481
-#> 
-#> 
-#> [1] "Analyzing rho = 0.1"
-#>   rho 0.8_0.1 0.9_0.1 0.95_0.1
-#> 1 0.1     259     376      481
-#> [1] "Analyzing rho = 0.1"
-#>   rho 0.8_0.1 0.9_0.1 0.95_0.1
-#> 1 0.1     284     402      511
-setwd("../")
-bm
-#> Unit: milliseconds
-#>     expr        min         lq       mean     median         uq        max neval cld
-#>  corevol 70813.8179 80813.5474 82261.3193 82128.2847 85916.3041 88041.9227    10   b
-#>  fastpos   323.4638   327.9482   337.8023   334.0527   348.6508   354.9915    10  a
-```
-
-Fastpos is more than 100 times faster than corEvol, for which there are
-two main reason: (1) fastpos is build around a C++ function via Rcpp and
-(2) this function does not calculate every calculation from scratch, but
-only calculates the difference between the correlation at time t and t+1
-via the sum formula of the Pearson correlation. There are some other
-factors that might play a role, but they cannot account for the large
-difference found. For instance, setting up a population takes quite long
-in corEvol (about 20s), but compared to the 8min overall, this is only a
-small fraction. There are other parts of the code that are destined to
-be slow, but again, a speedup of over 100 cannot be achieved by small
-improvements.
+For the chosen parameters, fastpos is about 500 times faster than
+corEvol, for which there are two main reasons: (1) fastpos is build
+around a C++ function via Rcpp and (2) this function does not calculate
+every calculation from scratch, but only calculates the difference
+between the correlation at time t and t+1 via the sum formula of the
+Pearson correlation. There are some other factors that might play a
+role, but they cannot account for the large difference found. For
+instance, setting up a population takes quite long in corEvol (about
+20s), but compared to the 8min overall, this is only a small fraction.
+There are other parts of the code that are destined to be slow, but
+again, a speedup by a factor of 500 cannot be achieved with small
+improvements. The presented benchmark is definitely not comprehensive,
+but only demonstrates that fastpos can be used with no significant
+waiting time for a typical scenario while for corEvol this is not the
+case.
 
 One might argue that corEvol can work with more than one core out of the
 box. But it is quite easy to also parallelize fastpos, for instance with
 mclapply from the parallel package. Furthermore, even a parallelized
-version of corEvol would need more than 100 cores to compete with
-fastpos.
+version of corEvol would need more than 500 cores to compete with
+fastpos. Overall, the speedup will hopefully pave the way for a wider
+usage of the *stability* approach as a way of sample size planning.
 
 ## Issues and Support
 
@@ -290,12 +225,3 @@ stick to the R packages book: <https://r-pkgs.org/> and follow the code
 style described here: <http://r-pkgs.had.co.nz/r.html#style>
 
 ## References
-
-Schönbrodt, F. D. & Perugini, M. (2013). At what sample size do
-correlations stabilize? *Journal of Research in Personality, 47*,
-609-612. \[<https://doi.org/10.1016/j.jrp.2013.05.009>\]
-
-Schönbrodt, F. D. & Perugini, M. (2018) Corrigendum to “At what sample
-size do correlations stabilize?” \[J. Res. Pers. 47 (2013) 609–612.
-<https://doi.org/10.1016/j.jrp.2013.05.009>\]. *Journal of Research in
-Personality, 74*, 194. \[<https://doi.org/10.1016/j.jrp.2018.02.010>\]
