@@ -3,6 +3,8 @@ title: "Introduction to fastpos"
 author: "Johannes Titz"
 date: "January, 2020"
 output: rmarkdown::html_vignette
+bibliography: "library.bib"
+csl: apa.csl
 vignette: >
   %\VignetteIndexEntry{fastpos}
   %\VignetteEngine{knitr::rmarkdown}
@@ -18,7 +20,7 @@ knitr::opts_chunk$set(
 
 The R package *fastpos* provides a fast algorithm to calculate the required sample size for a Pearson correlation to stabilize within a sequential framework [@schonbrodt2013;@schonbrodt2018]. Basically, one wants to find the sample size at which one can be sure that 1-α percent of many studies will fall into a specified corridor of stability around an assumed population correlation and stay inside that corridor if more participants are added to the study. For instance, find out *how many* participants per study are required so that, out of 100k studies, 90% would fall into the region between .4 to .6 (a Pearson correlation) and not leave this region again when more participants are added (under the assumption that the population correlation is .5). This sample size is also referred to as the *critical point of stability* for the specific parameters.
 
-This approach is related to accuracy in parameter estimation [AIPE, e.g. @maxwell2008] and as such can be seen as an alternative to power analysis. Unlike AIPE, the concept of *stability* incorporates the idea of sequentially adding participants to a study. Although the approach is young, it has already attracted a lot of interest in the psychological research community, which is evident in over 600 citations of the original publication [@schonbrodt2013]. To date there exists no easy way to use sequential stability for individual sample size planning because there is no analytical solution to the problem and a simulation approach is computationally expensive. The package *fastpos* overcomes this limitation by speeding up the calculation of correlations. For typical parameters, the theoretical speedup should be at least around 250. An empirical benchmark for a typical scenario even shows a speedup of about 600, paving the way for a wider usage of the *stability* approach.
+This approach is related to accuracy in parameter estimation [AIPE, e.g. @maxwell2008] and as such can be seen as an alternative to power analysis. Unlike AIPE, the concept of *stability* incorporates the idea of sequentially adding participants to a study. Although the approach is young, it has already attracted a lot of interest in the psychological research community, which is evident in over 600 citations of the original publication [@schonbrodt2013]. To date there exists no easy way to use sequential stability for individual sample size planning because there is no analytical solution to the problem and a simulation approach is computationally expensive. The package *fastpos* overcomes this limitation by speeding up the calculation of correlations. For typical parameters, the theoretical speedup should be at least around 250. An empirical benchmark for a typical scenario even shows a speedup of about 500, paving the way for a wider usage of the *stability* approach.
 
 If you have found this page, I assume you either want to (1) calculate the critical point of stability for your own study or (2) explore the method in general. If this is the case, read on and you should find what you are looking for. Let us first load the package and set a seed for reproducibility:
 
@@ -95,11 +97,8 @@ find_critical_pos(rho = seq(.1, .7, .1), sample_size_max = 1000,
                   n_studies = 10000)
 ```
 
-You can obviously parallelize the process, which will be especially useful if you want to run many simulations. For instance, if you increase the number of studies to 100k (as in the original article), it will take less than a minute on a modern CPU with several cores. On my i7-2640 with 4 cores, it takes about 30 s. Overall, this speedup is substantial compared to the original implementation. A rough benchmark can be found here: https://github.com/johannes-titz/fastpos which results in a speedup of about 600 for a typical scenario.
+You can obviously parallelize the process, which will be especially useful if you want to run many simulations. For instance, if you increase the number of studies to 100k (as in the original article), it will take less than a minute on a modern CPU with several cores. On my i7-2640 with 4 cores, it takes about 30 s. Overall, this speedup is substantial compared to the original implementation. A rough benchmark can be found here: https://github.com/johannes-titz/fastpos which results in a speedup of about 500 for a typical scenario.
 
 If you are interested in this package, there is still some work to do and I am happy if you like to contribute. Specifically, I would like to use RcppParallel to speed up the simulation directly in C++. This is rather of academic interest, as the functions are fast enough to find the critical point of stability for an individual study in a few seconds for most use cases. Indeed, I hope the package will be used this way---quite similar to a power analysis for significance testing.
 
 # References
-Schönbrodt, F. D. & Perugini, M. (2013). At what sample size do correlations stabilize? *Journal of Research in Personality, 47*, 609-612. [https://doi.org/10.1016/j.jrp.2013.05.009]
- 
-Schönbrodt, F. D. & Perugini, M. (2018) Corrigendum to “At what sample size do correlations stabilize?” [J. Res. Pers. 47 (2013) 609–612. https://doi.org/10.1016/j.jrp.2013.05.009]. *Journal of Research in Personality, 74*, 194. [https://doi.org/10.1016/j.jrp.2018.02.010]
