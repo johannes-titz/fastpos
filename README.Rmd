@@ -1,6 +1,7 @@
 ---
 output:
   github_document:
+    pandoc_args: --webtex
 bibliography: "library.bib"
 csl: apa.csl
 ---

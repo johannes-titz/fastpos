@@ -161,36 +161,55 @@ theoretical argument goes as follows:
 *corEvol* calculates every correlation from scratch. If we take the sum
 formula for the correlation coefficient
 
-\[r_{xy} = \frac{n\sum x_i y_i - \sum x_i \sum y_i}
-{\sqrt{n\sum x_i^2-(\sum x_i)^2} 
- \sqrt{n\sum y_i^2-(\sum y_i)^2}}\]
+  
+![r\_{xy} = \\frac{n\\sum x\_i y\_i - \\sum x\_i \\sum
+y\_i}&#10;{\\sqrt{n\\sum x\_i^2-(\\sum x\_i)^2} &#10; \\sqrt{n\\sum
+y\_i^2-(\\sum
+y\_i)^2}}](https://latex.codecogs.com/png.latex?r_%7Bxy%7D%20%3D%20%5Cfrac%7Bn%5Csum%20x_i%20y_i%20-%20%5Csum%20x_i%20%5Csum%20y_i%7D%0A%7B%5Csqrt%7Bn%5Csum%20x_i%5E2-%28%5Csum%20x_i%29%5E2%7D%20%0A%20%5Csqrt%7Bn%5Csum%20y_i%5E2-%28%5Csum%20y_i%29%5E2%7D%7D
+"r_{xy} = \\frac{n\\sum x_i y_i - \\sum x_i \\sum y_i}
+{\\sqrt{n\\sum x_i^2-(\\sum x_i)^2} 
+ \\sqrt{n\\sum y_i^2-(\\sum y_i)^2}}")  
 
 we can see that several sums are calculated, each consisting of adding
-up \(n\) (the sample size) terms. This has to be done for every sample
-size from the minimum to the maximum one. Thus, the total number of
-added terms for one sum is:
+up ![n](https://latex.codecogs.com/png.latex?n "n") (the sample size)
+terms. This has to be done for every sample size from the minimum to the
+maximum one. Thus, the total number of added terms for one sum is:
 
-\[\sum _{n_{min}}^{n_{max}}n = \sum_{n=1}^{n_{max}}n - \sum_{n=1}^{n_{min}-1}n = n_{max}(n_{max}+1)/2 -(n_{min}-1)(n_{min}-1+1)/2\]
+  
+![\\sum \_{n\_{min}}^{n\_{max}}n = \\sum\_{n=1}^{n\_{max}}n -
+\\sum\_{n=1}^{n\_{min}-1}n = n\_{max}(n\_{max}+1)/2
+-(n\_{min}-1)(n\_{min}-1+1)/2](https://latex.codecogs.com/png.latex?%5Csum%20_%7Bn_%7Bmin%7D%7D%5E%7Bn_%7Bmax%7D%7Dn%20%3D%20%5Csum_%7Bn%3D1%7D%5E%7Bn_%7Bmax%7D%7Dn%20-%20%5Csum_%7Bn%3D1%7D%5E%7Bn_%7Bmin%7D-1%7Dn%20%3D%20n_%7Bmax%7D%28n_%7Bmax%7D%2B1%29%2F2%20-%28n_%7Bmin%7D-1%29%28n_%7Bmin%7D-1%2B1%29%2F2
+"\\sum _{n_{min}}^{n_{max}}n = \\sum_{n=1}^{n_{max}}n - \\sum_{n=1}^{n_{min}-1}n = n_{max}(n_{max}+1)/2 -(n_{min}-1)(n_{min}-1+1)/2")  
 On the other hand, *fastpos* calculates the correlation for the maximum
-sample size first. This requires to add \(n\) numbers for one sum. Then
-it subtracts one value from this sum to find the correlation for the
-sample size \(n-1\), which happens repeatedely until the minimum sample
-size is reached. Overall the total number of terms for one sum amounts
-to:
+sample size first. This requires to add
+![n](https://latex.codecogs.com/png.latex?n "n") numbers for one sum.
+Then it subtracts one value from this sum to find the correlation for
+the sample size ![n-1](https://latex.codecogs.com/png.latex?n-1 "n-1"),
+which happens repeatedely until the minimum sample size is reached.
+Overall the total number of terms for one sum amounts to:
 
-\[n_{max}+n_{max}-n_{min}\]
+  
+![n\_{max}+n\_{max}-n\_{min}](https://latex.codecogs.com/png.latex?n_%7Bmax%7D%2Bn_%7Bmax%7D-n_%7Bmin%7D
+"n_{max}+n_{max}-n_{min}")  
 
 The ratio between the two approaches is:
 
-\[\frac{n_{max}(n_{max}+1)/2 -(n_{min}-1)n_{min}/2}{2n_{max}-n_{min}} \]
+  
+![\\frac{n\_{max}(n\_{max}+1)/2
+-(n\_{min}-1)n\_{min}/2}{2n\_{max}-n\_{min}}
+](https://latex.codecogs.com/png.latex?%5Cfrac%7Bn_%7Bmax%7D%28n_%7Bmax%7D%2B1%29%2F2%20-%28n_%7Bmin%7D-1%29n_%7Bmin%7D%2F2%7D%7B2n_%7Bmax%7D-n_%7Bmin%7D%7D%20
+"\\frac{n_{max}(n_{max}+1)/2 -(n_{min}-1)n_{min}/2}{2n_{max}-n_{min}} ")  
 
-For the typically used \(n_{max}\) of 1000 and \(n_{min}\) of 20, we can
-expect a speedup of about 250. This is only an approximation for several
-reasons. First, one can stop the process when the corridor is reached,
-which is done in *fastpos* but not in *corEvol*. Second, the main
-function of *fastpos* was written in C++ (via *Rcpp*), which is much
-faster than R. In a direct comparison between *fastpos* and *corEvol* we
-can expect *fastpos* to be at least 250 times faster.
+For the typically used
+![n\_{max}](https://latex.codecogs.com/png.latex?n_%7Bmax%7D "n_{max}")
+of 1000 and ![n\_{min}](https://latex.codecogs.com/png.latex?n_%7Bmin%7D
+"n_{min}") of 20, we can expect a speedup of about 250. This is only an
+approximation for several reasons. First, one can stop the process when
+the corridor is reached, which is done in *fastpos* but not in
+*corEvol*. Second, the main function of *fastpos* was written in C++
+(via *Rcpp*), which is much faster than R. In a direct comparison
+between *fastpos* and *corEvol* we can expect *fastpos* to be at least
+250 times faster.
 
 The theoretical difference is so big that it should suffice to give a
 rough benchmark for which the following parameters were chosen: rho =
@@ -269,18 +288,20 @@ For the chosen parameters, *fastpos* is about 500 times faster than
 *corEvol*, for which there are two main reasons: (1) *fastpos* is built
 around a C++ function via *Rcpp* and (2) this function does not
 calculate every calculation from scratch, but only calculates the
-difference between the correlation at sample size \(n\) and \(n-1\) via
-the sum formula of the Pearson correlation (see above). There are some
-other factors that might play a role, but they cannot account for the
-large difference found. For instance, setting up a population takes
-quite long in *corEvol* (about 20s), but compared to the \~9min required
-overall, this is only a small fraction. There are other parts of the
-*corEvol* code that are fated to be slow, but again, a speedup by a
-factor of 500 cannot be achieved by improving these parts. The presented
-benchmark is definitely not comprehensive, but only demonstrates that
-*fastpos* can be used with no significant waiting time for a typical
-scenario, while for *corEvol* this is not the case. The theoretically
-expected speedup by a factor of 250 was clearly exceeded.
+difference between the correlation at sample size
+![n](https://latex.codecogs.com/png.latex?n "n") and
+![n-1](https://latex.codecogs.com/png.latex?n-1 "n-1") via the sum
+formula of the Pearson correlation (see above). There are some other
+factors that might play a role, but they cannot account for the large
+difference found. For instance, setting up a population takes quite long
+in *corEvol* (about 20s), but compared to the \~9min required overall,
+this is only a small fraction. There are other parts of the *corEvol*
+code that are fated to be slow, but again, a speedup by a factor of 500
+cannot be achieved by improving these parts. The presented benchmark is
+definitely not comprehensive, but only demonstrates that *fastpos* can
+be used with no significant waiting time for a typical scenario, while
+for *corEvol* this is not the case. The theoretically expected speedup
+by a factor of 250 was clearly exceeded.
 
 One might think that *corEvol* can work with more than one core out of
 the box. But it is quite easy to also parallelize *fastpos*, for
@@ -360,7 +381,7 @@ correlations stabilize? *Journal of Research in Personality*, *47*,
 <div id="ref-schonbrodt2018">
 
 Schönbrodt, F. D., & Perugini, M. (2018). Corrigendum to “At What Sample
-Size Do Correlations Stabilize?” [J. Res. Pers. 47 (2013) 609–612].
+Size Do Correlations Stabilize?” \[J. Res. Pers. 47 (2013) 609–612\].
 *Journal of Research in Personality*, *74*, 194.
 <https://doi.org/10.1016/j.jrp.2018.02.010>
 
