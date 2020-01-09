@@ -94,7 +94,7 @@ we can see that several sums are calculated, each consisting of adding up $n$ (t
 
 $$\sum _{n_{min}}^{n_{max}}n = \sum_{n=1}^{n_{max}}n - \sum_{n=1}^{n_{min}-1}n = n_{max}(n_{max}+1)/2 -(n_{min}-1)(n_{min}-1+1)/2$$
 
-On the other hand, *fastpos* calculates the correlation for the maximum sample size first. This requires to add $n$ numbers for one sum. Then it subtracts one value from this sum to find the correlation for the sample size $n-1$, which happens repeatedely until the minimum sample size is reached. Overall the total number of terms for one sum amounts to:
+On the other hand, *fastpos* calculates the correlation for the maximum sample size first. This requires to add $n$ numbers for one sum. Then it subtracts one value from this sum to find the correlation for the sample size $n-1$, which happens repeatedly until the minimum sample size is reached. Overall the total number of terms for one sum amounts to:
 
 $$n_{max}+n_{max}-n_{min}$$
 

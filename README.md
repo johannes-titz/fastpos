@@ -186,7 +186,7 @@ sample size first. This requires to add
 ![n](https://latex.codecogs.com/png.latex?n "n") numbers for one sum.
 Then it subtracts one value from this sum to find the correlation for
 the sample size ![n-1](https://latex.codecogs.com/png.latex?n-1 "n-1"),
-which happens repeatedely until the minimum sample size is reached.
+which happens repeatedly until the minimum sample size is reached.
 Overall the total number of terms for one sum amounts to:
 
   
