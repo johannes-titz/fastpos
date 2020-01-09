@@ -179,7 +179,8 @@ maximum one. Thus, the total number of added terms for one sum is:
 ![\\sum \_{n\_{min}}^{n\_{max}}n = \\sum\_{n=1}^{n\_{max}}n -
 \\sum\_{n=1}^{n\_{min}-1}n = n\_{max}(n\_{max}+1)/2
 -(n\_{min}-1)(n\_{min}-1+1)/2](https://latex.codecogs.com/png.latex?%5Csum%20_%7Bn_%7Bmin%7D%7D%5E%7Bn_%7Bmax%7D%7Dn%20%3D%20%5Csum_%7Bn%3D1%7D%5E%7Bn_%7Bmax%7D%7Dn%20-%20%5Csum_%7Bn%3D1%7D%5E%7Bn_%7Bmin%7D-1%7Dn%20%3D%20n_%7Bmax%7D%28n_%7Bmax%7D%2B1%29%2F2%20-%28n_%7Bmin%7D-1%29%28n_%7Bmin%7D-1%2B1%29%2F2
-"\\sum _{n_{min}}^{n_{max}}n = \\sum_{n=1}^{n_{max}}n - \\sum_{n=1}^{n_{min}-1}n = n_{max}(n_{max}+1)/2 -(n_{min}-1)(n_{min}-1+1)/2")  
+"\\sum _{n_{min}}^{n_{max}}n = \\sum_{n=1}^{n_{max}}n - \\sum_{n=1}^{n_{min}-1}n = n_{max}(n_{max}+1)/2 -(n_{min}-1)(n_{min}-1+1)/2")
+
 On the other hand, *fastpos* calculates the correlation for the maximum
 sample size first. This requires to add
 ![n](https://latex.codecogs.com/png.latex?n "n") numbers for one sum.
@@ -381,7 +382,7 @@ correlations stabilize? *Journal of Research in Personality*, *47*,
 <div id="ref-schonbrodt2018">
 
 Schönbrodt, F. D., & Perugini, M. (2018). Corrigendum to “At What Sample
-Size Do Correlations Stabilize?” \[J. Res. Pers. 47 (2013) 609–612\].
+Size Do Correlations Stabilize?” [J. Res. Pers. 47 (2013) 609–612].
 *Journal of Research in Personality*, *74*, 194.
 <https://doi.org/10.1016/j.jrp.2018.02.010>
 
