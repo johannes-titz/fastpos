@@ -137,8 +137,8 @@ hist(pos, xlim = c(0, 1000), xlab = c("Point of stability"),
 
 ``` r
 quantile(pos, c(.8, .9, .95), na.rm = T)
-#> 80% 90% 95% 
-#> 142 205 274
+#>    80%    90%    95% 
+#> 142.00 205.00 274.05
 ```
 
 Note that no warning message appears if the corridor is not reached, but
@@ -165,12 +165,12 @@ formula for the correlation coefficient
 {\sqrt{n\sum x_i^2-(\sum x_i)^2} 
  \sqrt{n\sum y_i^2-(\sum y_i)^2}} \]
 
-we can see that six sums are calculated, each consisting of adding up
-\(n\) terms (the sample size). This has to be done for every sample size
-from the minimum to the maximum sample size. Then the total number of
+we can see that several sums are calculated, each consisting of adding
+up \(n\) (the sample size) terms . This has to be done for every sample
+size from the minimum to the maximum one. Thus, the total number of
 added terms for one sum is:
 
-\[\sum _{n=n_{min}}^{n_{max}}n = \sum_{n=1}^{n_{max}} - \sum_{n_=1}^{n_{min}}n = n_{max}(n_{max}+1)/2 -n_{min}(n_{min}+1)/2\]
+\[\sum _{n_{min}}^{n_{max}}n = \sum_{n=1}^{n_{max}}n - \sum_{n=1}^{n_{min}-1}n = n_{max}(n_{max}+1)/2 -(n_{min}-1)(n_{min}-1+1)/2\]
 On the other hand, *fastpos* calculates the correlation for the maximum
 sample size first. This requires to add \(n\) numbers for one sum. Then
 it subtracts one value from this sum to find the correlation for the
@@ -178,23 +178,24 @@ sample size \(n-1\), which happens repeatedely until the minimum sample
 size is reached. Overall the total number of terms for one sum amounts
 to:
 
-\[n_{max}+n_{max}-n_{min}-1\]
+\[n_{max}+n_{max}-n_{min}\]
 
 The ratio between the two approaches is:
 
-\[\frac{n_{max}(n_{max}+1)/2 -n_{min}(n_{min}+1)/2}{2n_{max}-n_{min}-1} \]
+\[\frac{n_{max}(n_{max}+1)/2 -(n_{min}-1)n_{min}/2}{2n_{max}-n_{min}} \]
 
-For the typically used \(n\) of 1000, we can expect a speedup of about
-250. This is only an approximation for several reasons. First, one can
-stop the process when the corridor is reached, which is done in
-*fastpos* but not in *corEvol*. Second, *fastpos* was written in C++,
-which is much faster than R. In a direct comparison between *fastpos*
-and *corEvol* we can expect *fastpos* to be at least 250 times faster,
-but more likely faster.
+For the typically used \(n_{max}\) of 1000 and \(n_{min}\) of 20, we can
+expect a speedup of about 250. This is only an approximation for several
+reasons. First, one can stop the process when the corridor is reached,
+which is done in *fastpos* but not in *corEvol*. Second, the main
+function of *fastpos* was written in C++ (via *Rcpp*), which is much
+faster than R. In a direct comparison between *fastpos* and *corEvol* we
+can expect *fastpos* to be at least 250 times faster.
 
-The difference is so big that it should suffice to give a rough
-benchmark for which the following parameters were chosen: rho = .1,
-sample\_size\_max = 1000, sample\_size\_min = 20, n\_studies = 10000.
+The theoretical difference is so big that it should suffice to give a
+rough benchmark for which the following parameters were chosen: rho =
+.1, sample\_size\_max = 1000, sample\_size\_min = 20, n\_studies =
+10000.
 
 Note that *corEvol* was written as a script for a simulation study and
 thus cannot be simply called via a function. Furthermore, a simulation
@@ -212,8 +213,8 @@ git -C corEvol pull || git clone --single-branch --branch benchmark https://gith
 For *corEvol*, two files are “sourced” for the benchmark. The first file
 generates the simulations and the second is for calculating the critical
 point of stability. I turned off all messages produced by these source
-files, except for the report of the critical point of stability – to
-show that it produces the same result as *fastpos*.
+files, except for the report of the critical point of stability—to show
+that it produces the same result as *fastpos*.
 
 ``` r
 library(microbenchmark)
@@ -266,20 +267,20 @@ bm
 
 For the chosen parameters, *fastpos* is about 500 times faster than
 *corEvol*, for which there are two main reasons: (1) *fastpos* is built
-around a C++ function via Rcpp and (2) this function does not calculate
-every calculation from scratch, but only calculates the difference
-between the correlation at time \(t\) and \(t+1\) via the sum formula of
-the Pearson correlation (see above). There are some other factors that
-might play a role, but they cannot account for the large difference
-found. For instance, setting up a population takes quite long in
-*corEvol* (about 20s), but compared to the \~9min required overall, this
-is only a small fraction. There are other parts of the *corEvol* code
-that are fated to be slow, but again, a speedup by a factor of 500
-cannot be achieved by improving these parts. The presented benchmark is
-definitely not comprehensive, but only demonstrates that *fastpos* can
-be used with no significant waiting time for a typical scenario, while
-for *corEvol* this is not the case. The theoretically expected speedup
-by a factor of 250 was clearly exceeded.
+around a C++ function via *Rcpp* and (2) this function does not
+calculate every calculation from scratch, but only calculates the
+difference between the correlation at sample size \(n\) and \(n-1\) via
+the sum formula of the Pearson correlation (see above). There are some
+other factors that might play a role, but they cannot account for the
+large difference found. For instance, setting up a population takes
+quite long in *corEvol* (about 20s), but compared to the \~9min required
+overall, this is only a small fraction. There are other parts of the
+*corEvol* code that are fated to be slow, but again, a speedup by a
+factor of 500 cannot be achieved by improving these parts. The presented
+benchmark is definitely not comprehensive, but only demonstrates that
+*fastpos* can be used with no significant waiting time for a typical
+scenario, while for *corEvol* this is not the case. The theoretically
+expected speedup by a factor of 250 was clearly exceeded.
 
 One might think that *corEvol* can work with more than one core out of
 the box. But it is quite easy to also parallelize *fastpos*, for
@@ -291,15 +292,14 @@ sample size planning.
 
 ## FAQ
 
-What does *fastpos* do if the corridor of stability is not reached for a
-simulation study?
+### What does *fastpos* do if the corridor of stability is not reached for a simulation study?
 
 In this case *fastpos* will return an NA value for the point of
 stability. When calculating the quantiles, *fastpos* will use the
 maximum sample size, which is a more reasonable estimate than ignoring
 the specific simulation study altogether.
 
-Why does *fastpos* produce different estimates to *corEvol*?
+### Why does *fastpos* produce different estimates to *corEvol*?
 
 If the same parameters are used, the differences are rather small. In
 general, differences cannot be avoided entirely due to the random nature
@@ -325,7 +325,7 @@ johannes at titz.science or johannes.titz at gmail.com
 
 ## Contributing
 
-Comments and Feedback of any kind are very welcome\! I will thoroughly
+Comments and feedback of any kind are very welcome\! I will thoroughly
 consider every suggestion on how to improve the code, the documentation,
 and the presented examples. Even minor things, such as suggestions for
 better wording or improving grammar in any part of the package, are more
@@ -360,7 +360,7 @@ correlations stabilize? *Journal of Research in Personality*, *47*,
 <div id="ref-schonbrodt2018">
 
 Schönbrodt, F. D., & Perugini, M. (2018). Corrigendum to “At What Sample
-Size Do Correlations Stabilize?” \[J. Res. Pers. 47 (2013) 609–612\].
+Size Do Correlations Stabilize?” [J. Res. Pers. 47 (2013) 609–612].
 *Journal of Research in Personality*, *74*, 194.
 <https://doi.org/10.1016/j.jrp.2018.02.010>
 
