@@ -12,8 +12,7 @@ License: GPL-3
 Imports: 
     Rcpp (>= 1.0.1),
     plyr,
-    MASS,
-    pbapply
+    MASS
 LinkingTo: Rcpp, RcppArmadillo, RcppProgress
 URL: https://github.com/johannes-titz/fastpos
 BugReports: https://github.com/johannes-titz/fastpos/issues
