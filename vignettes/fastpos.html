@@ -1,0 +1,425 @@
+<!DOCTYPE html>
+
+<html>
+
+<head>
+
+<meta charset="utf-8" />
+<meta name="generator" content="pandoc" />
+<meta http-equiv="X-UA-Compatible" content="IE=EDGE" />
+
+<meta name="viewport" content="width=device-width, initial-scale=1">
+
+<meta name="author" content="Johannes Titz" />
+
+
+<title>Introduction to fastpos</title>
+
+
+
+<style type="text/css">code{white-space: pre;}</style>
+<style type="text/css" data-origin="pandoc">
+code.sourceCode > span { display: inline-block; line-height: 1.25; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode { white-space: pre; position: relative; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+code.sourceCode { white-space: pre-wrap; }
+code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+    color: #aaaaaa;
+  }
+pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+code span.al { color: #ff0000; font-weight: bold; } /* Alert */
+code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } /* Annotation */
+code span.at { color: #7d9029; } /* Attribute */
+code span.bn { color: #40a070; } /* BaseN */
+code span.bu { } /* BuiltIn */
+code span.cf { color: #007020; font-weight: bold; } /* ControlFlow */
+code span.ch { color: #4070a0; } /* Char */
+code span.cn { color: #880000; } /* Constant */
+code span.co { color: #60a0b0; font-style: italic; } /* Comment */
+code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } /* CommentVar */
+code span.do { color: #ba2121; font-style: italic; } /* Documentation */
+code span.dt { color: #902000; } /* DataType */
+code span.dv { color: #40a070; } /* DecVal */
+code span.er { color: #ff0000; font-weight: bold; } /* Error */
+code span.ex { } /* Extension */
+code span.fl { color: #40a070; } /* Float */
+code span.fu { color: #06287e; } /* Function */
+code span.im { } /* Import */
+code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Information */
+code span.kw { color: #007020; font-weight: bold; } /* Keyword */
+code span.op { color: #666666; } /* Operator */
+code span.ot { color: #007020; } /* Other */
+code span.pp { color: #bc7a00; } /* Preprocessor */
+code span.sc { color: #4070a0; } /* SpecialChar */
+code span.ss { color: #bb6688; } /* SpecialString */
+code span.st { color: #4070a0; } /* String */
+code span.va { color: #19177c; } /* Variable */
+code span.vs { color: #4070a0; } /* VerbatimString */
+code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
+
+</style>
+<script>
+// apply pandoc div.sourceCode style to pre.sourceCode instead
+(function() {
+  var sheets = document.styleSheets;
+  for (var i = 0; i < sheets.length; i++) {
+    if (sheets[i].ownerNode.dataset["origin"] !== "pandoc") continue;
+    try { var rules = sheets[i].cssRules; } catch (e) { continue; }
+    for (var j = 0; j < rules.length; j++) {
+      var rule = rules[j];
+      // check if there is a div.sourceCode rule
+      if (rule.type !== rule.STYLE_RULE || rule.selectorText !== "div.sourceCode") continue;
+      var style = rule.style.cssText;
+      // check if color or background-color is set
+      if (rule.style.color === '' && rule.style.backgroundColor === '') continue;
+      // replace div.sourceCode by a pre.sourceCode rule
+      sheets[i].deleteRule(j);
+      sheets[i].insertRule('pre.sourceCode{' + style + '}', j);
+    }
+  }
+})();
+</script>
+
+
+
+<style type="text/css">body {
+background-color: #fff;
+margin: 1em auto;
+max-width: 700px;
+overflow: visible;
+padding-left: 2em;
+padding-right: 2em;
+font-family: "Open Sans", "Helvetica Neue", Helvetica, Arial, sans-serif;
+font-size: 14px;
+line-height: 1.35;
+}
+#header {
+text-align: center;
+}
+#TOC {
+clear: both;
+margin: 0 0 10px 10px;
+padding: 4px;
+width: 400px;
+border: 1px solid #CCCCCC;
+border-radius: 5px;
+background-color: #f6f6f6;
+font-size: 13px;
+line-height: 1.3;
+}
+#TOC .toctitle {
+font-weight: bold;
+font-size: 15px;
+margin-left: 5px;
+}
+#TOC ul {
+padding-left: 40px;
+margin-left: -1.5em;
+margin-top: 5px;
+margin-bottom: 5px;
+}
+#TOC ul ul {
+margin-left: -2em;
+}
+#TOC li {
+line-height: 16px;
+}
+table {
+margin: 1em auto;
+border-width: 1px;
+border-color: #DDDDDD;
+border-style: outset;
+border-collapse: collapse;
+}
+table th {
+border-width: 2px;
+padding: 5px;
+border-style: inset;
+}
+table td {
+border-width: 1px;
+border-style: inset;
+line-height: 18px;
+padding: 5px 5px;
+}
+table, table th, table td {
+border-left-style: none;
+border-right-style: none;
+}
+table thead, table tr.even {
+background-color: #f7f7f7;
+}
+p {
+margin: 0.5em 0;
+}
+blockquote {
+background-color: #f6f6f6;
+padding: 0.25em 0.75em;
+}
+hr {
+border-style: solid;
+border: none;
+border-top: 1px solid #777;
+margin: 28px 0;
+}
+dl {
+margin-left: 0;
+}
+dl dd {
+margin-bottom: 13px;
+margin-left: 13px;
+}
+dl dt {
+font-weight: bold;
+}
+ul {
+margin-top: 0;
+}
+ul li {
+list-style: circle outside;
+}
+ul ul {
+margin-bottom: 0;
+}
+pre, code {
+background-color: #f7f7f7;
+border-radius: 3px;
+color: #333;
+white-space: pre-wrap; 
+}
+pre {
+border-radius: 3px;
+margin: 5px 0px 10px 0px;
+padding: 10px;
+}
+pre:not([class]) {
+background-color: #f7f7f7;
+}
+code {
+font-family: Consolas, Monaco, 'Courier New', monospace;
+font-size: 85%;
+}
+p > code, li > code {
+padding: 2px 0px;
+}
+div.figure {
+text-align: center;
+}
+img {
+background-color: #FFFFFF;
+padding: 2px;
+border: 1px solid #DDDDDD;
+border-radius: 3px;
+border: 1px solid #CCCCCC;
+margin: 0 5px;
+}
+h1 {
+margin-top: 0;
+font-size: 35px;
+line-height: 40px;
+}
+h2 {
+border-bottom: 4px solid #f7f7f7;
+padding-top: 10px;
+padding-bottom: 2px;
+font-size: 145%;
+}
+h3 {
+border-bottom: 2px solid #f7f7f7;
+padding-top: 10px;
+font-size: 120%;
+}
+h4 {
+border-bottom: 1px solid #f7f7f7;
+margin-left: 8px;
+font-size: 105%;
+}
+h5, h6 {
+border-bottom: 1px solid #ccc;
+font-size: 105%;
+}
+a {
+color: #0033dd;
+text-decoration: none;
+}
+a:hover {
+color: #6666ff; }
+a:visited {
+color: #800080; }
+a:visited:hover {
+color: #BB00BB; }
+a[href^="http:"] {
+text-decoration: underline; }
+a[href^="https:"] {
+text-decoration: underline; }
+
+code > span.kw { color: #555; font-weight: bold; } 
+code > span.dt { color: #902000; } 
+code > span.dv { color: #40a070; } 
+code > span.bn { color: #d14; } 
+code > span.fl { color: #d14; } 
+code > span.ch { color: #d14; } 
+code > span.st { color: #d14; } 
+code > span.co { color: #888888; font-style: italic; } 
+code > span.ot { color: #007020; } 
+code > span.al { color: #ff0000; font-weight: bold; } 
+code > span.fu { color: #900; font-weight: bold; }  code > span.er { color: #a61717; background-color: #e3d2d2; } 
+</style>
+
+
+
+
+</head>
+
+<body>
+
+
+
+
+<h1 class="title toc-ignore">Introduction to fastpos</h1>
+<h4 class="author">Johannes Titz</h4>
+<h4 class="date">January, 2020</h4>
+
+
+
+<p>The R package <em>fastpos</em> provides a fast algorithm to calculate the required sample size for a Pearson correlation to stabilize within a sequential framework <span class="citation">(Schönbrodt &amp; Perugini, 2013, 2018)</span>. Basically, one wants to find the sample size at which one can be sure that 1-α percent of many studies will fall into a specified corridor of stability around an assumed population correlation and stay inside that corridor if more participants are added to the study. For instance, find out <em>how many</em> participants per study are required so that, out of 100k studies, 90% would fall into the region between .4 to .6 (a Pearson correlation) and not leave this region again when more participants are added (under the assumption that the population correlation is .5). This sample size is also referred to as the <em>critical point of stability</em> for the specific parameters.</p>
+<p>This approach is related to accuracy in parameter estimation <span class="citation">(AIPE, e.g. Maxwell, Kelley, &amp; Rausch, 2008)</span> and as such can be seen as an alternative to power analysis. Unlike AIPE, the concept of <em>stability</em> incorporates the idea of sequentially adding participants to a study. Although the approach is young, it has already attracted a lot of interest in the psychological research community, which is evident in over 600 citations of the original publication <span class="citation">(Schönbrodt &amp; Perugini, 2013)</span>. To date there exists no easy way to use sequential stability for individual sample size planning because there is no analytical solution to the problem and a simulation approach is computationally expensive. The package <em>fastpos</em> overcomes this limitation by speeding up the calculation of correlations. For typical parameters, the theoretical speedup should be at least around 250. An empirical benchmark for a typical scenario even shows a speedup of about 500, paving the way for a wider usage of the <em>stability</em> approach.</p>
+<p>If you have found this page, I assume you either want to (1) calculate the critical point of stability for your own study or (2) explore the method in general. If this is the case, read on and you should find what you are looking for. Let us first load the package and set a seed for reproducibility:</p>
+<div class="sourceCode" id="cb1"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1"></a><span class="kw">library</span>(fastpos)</span>
+<span id="cb1-2"><a href="#cb1-2"></a><span class="kw">set.seed</span>(<span class="dv">19950521</span>)</span></code></pre></div>
+<p>In most cases you will just need the function <strong>find_critical_pos</strong> which will give you the critical point of stability for your specific parameters.</p>
+<p>Let us reproduce one example from Schönbrodt and Perugini’s work (this should take only a couple of seconds on a modern CPU):</p>
+<div class="sourceCode" id="cb2"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1"></a><span class="kw">find_critical_pos</span>(<span class="dt">rho =</span> <span class="fl">.7</span>, <span class="dt">sample_size_min =</span> <span class="dv">20</span>, <span class="dt">sample_size_max =</span> <span class="dv">1000</span>,</span>
+<span id="cb2-2"><a href="#cb2-2"></a>                  <span class="dt">n_studies =</span> <span class="dv">10000</span>)</span>
+<span id="cb2-3"><a href="#cb2-3"></a><span class="co">#&gt;     rho_pop 80% 90% 95% sample_size_min sample_size_max lower_limit upper_limit n_studies n_not_breached precision precision_rel</span></span>
+<span id="cb2-4"><a href="#cb2-4"></a><span class="co">#&gt; 1 0.6997798  63  95 130              20            1000         0.6         0.8     10000              0       0.1         FALSE</span></span></code></pre></div>
+<p>The result is very close to Schönbrodt and Perugini’s table (see <a href="https://github.com/nicebread/corEvol" class="uri">https://github.com/nicebread/corEvol</a>).</p>
+<p>Note that <strong>find_critical_pos</strong> will throw a message if at least one study did not reach the corridor of stability with the maximum sample size. This happened in Schönbrodt and Perugini’s work, but quite seldom. Still, it should be be avoided for a proper estimate of the point of stability.</p>
+<div class="sourceCode" id="cb3"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1"></a><span class="kw">find_critical_pos</span>(<span class="dt">rho =</span> <span class="fl">.7</span>, <span class="dt">sample_size_min =</span> <span class="dv">20</span>, <span class="dt">sample_size_max =</span> <span class="dv">400</span>,</span>
+<span id="cb3-2"><a href="#cb3-2"></a>                  <span class="dt">n_studies =</span> <span class="dv">10000</span>)</span>
+<span id="cb3-3"><a href="#cb3-3"></a><span class="co">#&gt; Warning in find_critical_pos(rho = 0.7, sample_size_min = 20, sample_size_max = 400, : 3 simulation[s] did not reach the corridor of</span></span>
+<span id="cb3-4"><a href="#cb3-4"></a><span class="co">#&gt;             stability.</span></span>
+<span id="cb3-5"><a href="#cb3-5"></a><span class="co">#&gt; Increase sample_size_max and rerun the simulation.</span></span>
+<span id="cb3-6"><a href="#cb3-6"></a><span class="co">#&gt;     rho_pop 80% 90% 95% sample_size_min sample_size_max lower_limit upper_limit n_studies n_not_breached precision precision_rel</span></span>
+<span id="cb3-7"><a href="#cb3-7"></a><span class="co">#&gt; 1 0.6998704  65  97 131              20             400         0.6         0.8     10000              3       0.1         FALSE</span></span></code></pre></div>
+<p>In this case, do what the message suggests and increase the maximum sample size. Note that larger sample sizes are more resource intensive because the correlations are calculated in the reverse way (from the maximum sample size downwards). Thus, you usually would not like to increase the maximum sample size, unless there are studies that did not reach the corridor of stability.</p>
+<p>If you need different confidence levels, just state it:</p>
+<div class="sourceCode" id="cb4"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1"></a><span class="kw">find_critical_pos</span>(<span class="dt">rho =</span> <span class="fl">.7</span>, <span class="dt">sample_size_min =</span> <span class="dv">20</span>, <span class="dt">sample_size_max =</span> <span class="dv">1000</span>,</span>
+<span id="cb4-2"><a href="#cb4-2"></a>                  <span class="dt">n_studies =</span> <span class="dv">10000</span>, <span class="dt">confidence_levels =</span> <span class="kw">c</span>(.<span class="dv">6</span>, <span class="fl">.85</span>))</span>
+<span id="cb4-3"><a href="#cb4-3"></a><span class="co">#&gt;     rho_pop 60% 85% sample_size_min sample_size_max lower_limit upper_limit n_studies n_not_breached precision precision_rel</span></span>
+<span id="cb4-4"><a href="#cb4-4"></a><span class="co">#&gt; 1 0.7006911  38  78              20            1000         0.6         0.8     10000              0       0.1         FALSE</span></span></code></pre></div>
+<p>This has no effect on resource consumption because the time consuming part is to simulate the distribution, not calculating quantiles of the distribution.</p>
+<p>If you need a different precision level or even relative precision, specify it:</p>
+<div class="sourceCode" id="cb5"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1"></a><span class="kw">find_critical_pos</span>(<span class="dt">rho =</span> <span class="kw">c</span>(.<span class="dv">5</span>, <span class="fl">.7</span>), <span class="dt">sample_size_min =</span> <span class="dv">20</span>, <span class="dt">sample_size_max =</span> <span class="dv">2500</span>,</span>
+<span id="cb5-2"><a href="#cb5-2"></a>                  <span class="dt">n_studies =</span> <span class="dv">10000</span>, <span class="dt">precision =</span> <span class="fl">.10</span>, <span class="dt">precision_rel =</span> T)</span>
+<span id="cb5-3"><a href="#cb5-3"></a><span class="co">#&gt; Warning in find_critical_pos(rho = c(0.5, 0.7), sample_size_min = 20, sample_size_max = 2500, : 9 simulation[s] did not reach the corridor of</span></span>
+<span id="cb5-4"><a href="#cb5-4"></a><span class="co">#&gt;             stability.</span></span>
+<span id="cb5-5"><a href="#cb5-5"></a><span class="co">#&gt; Increase sample_size_max and rerun the simulation.</span></span>
+<span id="cb5-6"><a href="#cb5-6"></a><span class="co">#&gt;     rho_pop 80% 90%     95% sample_size_min sample_size_max lower_limit upper_limit n_studies n_not_breached precision</span></span>
+<span id="cb5-7"><a href="#cb5-7"></a><span class="co">#&gt; 1 0.4990567 596 856 1119.05              20            2500        0.45        0.55     10000              9       0.1</span></span>
+<span id="cb5-8"><a href="#cb5-8"></a><span class="co">#&gt; 2 0.6997279 137 199  261.00              20            2500        0.63        0.77     10000              0       0.1</span></span>
+<span id="cb5-9"><a href="#cb5-9"></a><span class="co">#&gt;   precision_rel</span></span>
+<span id="cb5-10"><a href="#cb5-10"></a><span class="co">#&gt; 1          TRUE</span></span>
+<span id="cb5-11"><a href="#cb5-11"></a><span class="co">#&gt; 2          TRUE</span></span></code></pre></div>
+<p>As you can see in the output, the limits were set relatively to the population correlation (+-25% of the population correlation).</p>
+<p>If you want to dig deeper, you can have a look at the functions that <em>find_critical_pos</em> builds upon. <strong>simulate_pos</strong> is the workhorse of the package. It calls a C++ function to calculate correlations sequentially and it does this pretty quickly (but you know that already, right?). A rawish approach would be to create a population with <strong>create_pop</strong> and pass it to <strong>simulate_pos</strong>:</p>
+<div class="sourceCode" id="cb6"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1"></a>pop &lt;-<span class="st"> </span><span class="kw">create_pop</span>(<span class="fl">0.5</span>, <span class="dv">1000000</span>)</span>
+<span id="cb6-2"><a href="#cb6-2"></a>pos &lt;-<span class="st"> </span><span class="kw">simulate_pos</span>(<span class="dt">x_pop =</span> pop[,<span class="dv">1</span>],</span>
+<span id="cb6-3"><a href="#cb6-3"></a>                    <span class="dt">y_pop =</span> pop[,<span class="dv">2</span>],</span>
+<span id="cb6-4"><a href="#cb6-4"></a>                    <span class="dt">number_of_studies =</span> <span class="dv">1000</span>,</span>
+<span id="cb6-5"><a href="#cb6-5"></a>                    <span class="dt">sample_size_min =</span> <span class="dv">20</span>,</span>
+<span id="cb6-6"><a href="#cb6-6"></a>                    <span class="dt">sample_size_max =</span> <span class="dv">1000</span>,</span>
+<span id="cb6-7"><a href="#cb6-7"></a>                    <span class="dt">replace =</span> T,</span>
+<span id="cb6-8"><a href="#cb6-8"></a>                    <span class="dt">lower_limit =</span> <span class="fl">0.4</span>,</span>
+<span id="cb6-9"><a href="#cb6-9"></a>                    <span class="dt">upper_limit =</span> <span class="fl">0.6</span>)</span>
+<span id="cb6-10"><a href="#cb6-10"></a><span class="kw">hist</span>(pos, <span class="dt">xlim =</span> <span class="kw">c</span>(<span class="dv">0</span>, <span class="dv">1000</span>), <span class="dt">xlab =</span> <span class="kw">c</span>(<span class="st">&quot;Point of stability&quot;</span>),</span>
+<span id="cb6-11"><a href="#cb6-11"></a>     <span class="dt">main =</span> <span class="st">&quot;Histogram of points of stability for rho = .5+-.1&quot;</span>)</span></code></pre></div>
+<p><img src="data:image/png;base64,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" /><!-- --></p>
+<div class="sourceCode" id="cb7"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1"></a><span class="kw">quantile</span>(pos, <span class="kw">c</span>(.<span class="dv">8</span>, <span class="fl">.9</span>, <span class="fl">.95</span>), <span class="dt">na.rm =</span> T)</span>
+<span id="cb7-2"><a href="#cb7-2"></a><span class="co">#&gt;   80%   90%   95% </span></span>
+<span id="cb7-3"><a href="#cb7-3"></a><span class="co">#&gt; 141.0 214.1 270.0</span></span></code></pre></div>
+<p>Note that no warning message appears if the corridor is not reached, but instead an NA value is returned. Pay careful attention if you work with this function, and adjust the maximum sample size as needed.</p>
+<p><strong>create_pop</strong> creates the population matrix by using <strong>mvrnorm</strong>. This is a much simpler way than Schönbrodt and Perugini’s approach, but the results do not seem to differ. If you are interested in how population parameters (e.g. skewness) affect the point of stability, you should instead refer to the population generating functions in Schönbrodt and Perugini’s work.</p>
+<p>As you can see, there is not really much to the sequential definition of stability, except for calculating billions of correlations. This is done quite fast with the help of <strong>Rcpp</strong>.</p>
+<p>Let us reproduce Schönbrodt and Perugini’s quite famous and oft-cited table of the critical points of stability for a precision of 0.1. We set the maximum sample size a bit higher, so we avoid studies where the corridor is never reached. We reduce the number of studies to 10k so that it runs fairly quickly.</p>
+<div class="sourceCode" id="cb8"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1"></a><span class="kw">find_critical_pos</span>(<span class="dt">rho =</span> <span class="kw">seq</span>(.<span class="dv">1</span>, <span class="fl">.7</span>, <span class="fl">.1</span>), <span class="dt">sample_size_max =</span> <span class="dv">1000</span>,</span>
+<span id="cb8-2"><a href="#cb8-2"></a>                  <span class="dt">n_studies =</span> <span class="dv">10000</span>)</span>
+<span id="cb8-3"><a href="#cb8-3"></a><span class="co">#&gt; Warning in find_critical_pos(rho = seq(0.1, 0.7, 0.1), sample_size_max = 1000, : 30 simulation[s] did not reach the corridor of</span></span>
+<span id="cb8-4"><a href="#cb8-4"></a><span class="co">#&gt;             stability.</span></span>
+<span id="cb8-5"><a href="#cb8-5"></a><span class="co">#&gt; Increase sample_size_max and rerun the simulation.</span></span>
+<span id="cb8-6"><a href="#cb8-6"></a><span class="co">#&gt;     rho_pop   80% 90%    95% sample_size_min sample_size_max lower_limit upper_limit n_studies n_not_breached precision</span></span>
+<span id="cb8-7"><a href="#cb8-7"></a><span class="co">#&gt; 1 0.1005987 253.0 365 479.00              20            1000         0.0         0.2     10000             11       0.1</span></span>
+<span id="cb8-8"><a href="#cb8-8"></a><span class="co">#&gt; 2 0.1998043 234.0 335 433.00              20            1000         0.1         0.3     10000             10       0.1</span></span>
+<span id="cb8-9"><a href="#cb8-9"></a><span class="co">#&gt; 3 0.3004318 214.2 304 393.00              20            1000         0.2         0.4     10000              6       0.1</span></span>
+<span id="cb8-10"><a href="#cb8-10"></a><span class="co">#&gt; 4 0.4004198 184.0 267 354.05              20            1000         0.3         0.5     10000              2       0.1</span></span>
+<span id="cb8-11"><a href="#cb8-11"></a><span class="co">#&gt; 5 0.4986327 145.0 208 276.00              20            1000         0.4         0.6     10000              1       0.1</span></span>
+<span id="cb8-12"><a href="#cb8-12"></a><span class="co">#&gt; 6 0.5991916 104.0 150 200.00              20            1000         0.5         0.7     10000              0       0.1</span></span>
+<span id="cb8-13"><a href="#cb8-13"></a><span class="co">#&gt; 7 0.6999457  65.0  96 128.05              20            1000         0.6         0.8     10000              0       0.1</span></span>
+<span id="cb8-14"><a href="#cb8-14"></a><span class="co">#&gt;   precision_rel</span></span>
+<span id="cb8-15"><a href="#cb8-15"></a><span class="co">#&gt; 1         FALSE</span></span>
+<span id="cb8-16"><a href="#cb8-16"></a><span class="co">#&gt; 2         FALSE</span></span>
+<span id="cb8-17"><a href="#cb8-17"></a><span class="co">#&gt; 3         FALSE</span></span>
+<span id="cb8-18"><a href="#cb8-18"></a><span class="co">#&gt; 4         FALSE</span></span>
+<span id="cb8-19"><a href="#cb8-19"></a><span class="co">#&gt; 5         FALSE</span></span>
+<span id="cb8-20"><a href="#cb8-20"></a><span class="co">#&gt; 6         FALSE</span></span>
+<span id="cb8-21"><a href="#cb8-21"></a><span class="co">#&gt; 7         FALSE</span></span></code></pre></div>
+<p>You can obviously parallelize the process, which will be especially useful if you want to run many simulations. For instance, if you increase the number of studies to 100k (as in the original article), it will take less than a minute on a modern CPU with several cores. On my i7-2640 with 4 cores, it takes about 30 s. Overall, this speedup is substantial compared to the original implementation. A rough benchmark can be found here: <a href="https://github.com/johannes-titz/fastpos" class="uri">https://github.com/johannes-titz/fastpos</a> which results in a speedup of about 500 for a typical scenario.</p>
+<p>If you are interested in this package, there is still some work to do and I am happy if you like to contribute. Specifically, I would like to use RcppParallel to speed up the simulation directly in C++. This is rather of academic interest, as the functions are fast enough to find the critical point of stability for an individual study in a few seconds for most use cases. Indeed, I hope the package will be used this way—quite similar to a power analysis for significance testing.</p>
+<div id="references" class="section level1 unnumbered">
+<h1>References</h1>
+<div id="refs" class="references">
+<div id="ref-maxwell2008">
+<p>Maxwell, S. E., Kelley, K., &amp; Rausch, J. R. (2008). Sample size planning for statistical power and accuracy in parameter estimation. <em>Annual Review of Psychology</em>, <em>59</em>, 537–563. <a href="https://doi.org/10.1146/annurev.psych.59.103006.093735">https://doi.org/10.1146/annurev.psych.59.103006.093735</a></p>
+</div>
+<div id="ref-schonbrodt2013">
+<p>Schönbrodt, F. D., &amp; Perugini, M. (2013). At what sample size do correlations stabilize? <em>Journal of Research in Personality</em>, <em>47</em>, 609–612. <a href="https://doi.org/10.1016/j.jrp.2013.05.009">https://doi.org/10.1016/j.jrp.2013.05.009</a></p>
+</div>
+<div id="ref-schonbrodt2018">
+<p>Schönbrodt, F. D., &amp; Perugini, M. (2018). Corrigendum to “At What Sample Size Do Correlations Stabilize?” [J. Res. Pers. 47 (2013) 609–612]. <em>Journal of Research in Personality</em>, <em>74</em>, 194. <a href="https://doi.org/10.1016/j.jrp.2018.02.010">https://doi.org/10.1016/j.jrp.2018.02.010</a></p>
+</div>
+</div>
+</div>
+
+
+
+<!-- code folding -->
+
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+
+</body>
+</html>
