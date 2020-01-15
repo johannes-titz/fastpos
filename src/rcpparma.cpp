@@ -132,7 +132,7 @@ IntegerVector simulate_pos(NumericVector x_pop,
   }
   Progress p(number_of_studies, true);
   for (int k = 0; k < number_of_studies; k++) {
-    if (k % 10000 == 0) {
+    if (k % 500 == 0) {
       checkUserInterrupt();
     }
     p.increment();
