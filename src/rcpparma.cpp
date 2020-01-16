@@ -133,8 +133,10 @@ IntegerVector simulate_pos(NumericVector x_pop,
   Progress p(number_of_studies, true);
   for (int k = 0; k < number_of_studies; k++) {
     if (k % 10000 == 0) {
-      if (Progress::check_abort() )
-         return ret;
+      if (Progress::check_abort() ) {
+        p.cleanup();
+        return(ret);
+      }
     }
     p.increment();
     ret[k] = simulate_one_pos(x_pop, y_pop, index_pop, sample_size_min,
