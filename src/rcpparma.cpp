@@ -130,12 +130,12 @@ IntegerVector simulate_pos(NumericVector x_pop,
   for (int i = 0; i < npop; i++){
     index_pop[i] = i;
   }
+
   Progress p(number_of_studies, true);
   for (int k = 0; k < number_of_studies; k++) {
-    if (k % 10000 == 0) {
+    if (k % 1000 == 0) {
       if (Progress::check_abort() ) {
-        p.cleanup();
-        return(ret);
+        return(IntegerVector::create(-1));
       }
     }
     p.increment();
