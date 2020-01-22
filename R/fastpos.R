@@ -38,6 +38,18 @@ create_pop <- function(rho, size){
   pop
 }
 
+#' Creates a population with a specified correlation exactly.
+#' https://stats.stackexchange.com/questions/15011/generate-a-random-variable-with-a-defined-correlation-to-an-existing-variables/15040#15040
+#'
+#' @export
+create_pop2 <- function(rho, size) {
+  y <- rnorm(size)
+  x <- rnorm(size) # Optional: supply a default if `x` is not given
+  y.perp <- residuals(lm(x ~ y))
+  x <- rho * sd(y.perp) * y + y.perp * sd(y) * sqrt(1 - rho^2)
+  matrix(c(x, y), ncol = 2)
+}
+
 #' Run simulation for one specific correlation.
 #'
 #' @param rho Population correlation.
@@ -73,7 +85,7 @@ find_one_critical_pos <- function(rho, sample_size_min = 20,
   lower_limit <- limits[1]
   upper_limit <- limits[2]
   # create bivariate population distribution
-  pop <- create_pop(rho, pop_size)
+  pop <- create_pop2(rho, pop_size)
 
   x <- pop[,1]
   y <- pop[,2]
