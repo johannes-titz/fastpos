@@ -49,6 +49,18 @@ create_pop <- function(rho, size){
   pop
 }
 
+#' Creates a population with a specified correlation exactly.
+#' https://stats.stackexchange.com/questions/15011/generate-a-random-variable-with-a-defined-correlation-to-an-existing-variables/15040#15040
+#'
+#' @export
+create_pop2 <- function(rho, size) {
+  y <- rnorm(size)
+  x <- rnorm(size) # Optional: supply a default if `x` is not given
+  y.perp <- residuals(lm(x ~ y))
+  x <- rho * sd(y.perp) * y + y.perp * sd(y) * sqrt(1 - rho^2)
+  matrix(c(x, y), ncol = 2)
+}
+
 #' Run simulation for one specific correlation.
 #'
 #' @param rho Population correlation.
@@ -84,7 +96,7 @@ find_one_critical_pos <- function(rho, sample_size_min = 20,
   lower_limit <- limits[1]
   upper_limit <- limits[2]
   # create bivariate population distribution
-  pop <- create_pop(rho, pop_size)
+  pop <- create_pop2(rho, pop_size)
 
   x <- pop[,1]
   y <- pop[,2]
@@ -95,7 +107,7 @@ find_one_critical_pos <- function(rho, sample_size_min = 20,
                        lower_limit, upper_limit)
   # on interruption, C++ will return -1 (if R interrupts by itself, nothing
   # will be returned, it just stops)
-  if (res == -1) stopQuietly()
+  if (length(res) == 1 & res[1] == -1) stopQuietly()
   names(res) <- unlist(paste("study ", 1:length(res)))
   n_not_breached <- sum(is.na(res))
 
@@ -169,3 +181,5 @@ find_critical_pos <- function(rhos, precision = 0.1, precision_rel = FALSE,
 .onUnload <- function(libpath) {
   library.dynam.unload("fastpos", libpath)
 }
+
+# parallel::mclapply(c(0.1, 0.1, 0.1, 0.1), function(x) fastpos::find_critical_pos(0.1, n_studies = 1e6))

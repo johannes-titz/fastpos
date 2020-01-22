@@ -6,7 +6,7 @@
 \alias{fastpos-package}
 \title{fastpos: Finds the Critical Sequential Point of Stability for a Pearson Correlation}
 \description{
-Finds the critical sample size ("point of stability") for a 
+Finds the critical sample size ("critical point of stability") for a 
     correlation to stabilize in Schoenbrodt and Perugini's definition of 
     sequential stability (see <doi:10.1016/j.jrp.2013.05.009>).
 }
@@ -30,7 +30,8 @@ Personality, 74}, 194. \url{https://doi.org/10.1016/j.jrp.2018.02.010}
 \seealso{
 Useful links:
 \itemize{
-  \item Report bugs at \url{https://github.com/johannes-titz/fastpos}
+  \item \url{https://github.com/johannes-titz/fastpos}
+  \item Report bugs at \url{https://github.com/johannes-titz/fastpos/issues}
 }
 
 }
