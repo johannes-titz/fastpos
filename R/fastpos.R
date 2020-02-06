@@ -28,14 +28,38 @@ NULL
 #' @examples
 #' pop <- create_pop(0.5, 100000)
 #' cor(pop)
-#' @export
-create_pop <- function(rho, size){
+#' @noRd
+create_pop_inexact <- function(rho, size){
   mu <- c(1, 2)
   s1 <- 2
   s2 <- 8
   sigma <- matrix(c(s1^2, s1 * s2 * rho, s1 * s2 * rho, s2^2), 2)
   pop <- MASS::mvrnorm(n = size, mu = mu, Sigma = sigma)
   pop
+}
+
+
+#' Creates a population with a specified correlation.
+#'
+#' The correlation will be exactly the one specified. The used method is described here: https://stats.stackexchange.com/questions/15011/generate-a-random-variable-with-a-defined-correlation-to-an-existing-variables/15040#15040
+#'
+#' @param rho Population correlation.
+#' @param size Population size.
+#' @return Two-dimensional population matrix with a specific correlation.
+#' @examples
+#' pop <- create_pop(0.5, 100000)
+#' cor(pop)
+#' @export
+create_pop <- function(rho, size) {
+  y <- stats::rnorm(size)
+  x <- stats::rnorm(size)
+  y.perp <- stats::residuals(stats::lm(x ~ y))
+  x <- rho * stats::sd(y.perp) * y + y.perp * stats::sd(y) * sqrt(1 - rho^2)
+  y <- stats::rnorm(size)
+  x <- stats::rnorm(size)
+  y.perp <- stats::residuals(stats::lm(x ~ y))
+  x <- rho * stats::sd(y.perp) * y + y.perp * stats::sd(y) * sqrt(1 - rho^2)
+  matrix(c(x, y), ncol = 2)
 }
 
 #' Run simulation for one specific correlation.
