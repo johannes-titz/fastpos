@@ -15,7 +15,7 @@ create_pop(rho, size)
 Two-dimensional population matrix with a specific correlation.
 }
 \description{
-Creates a population with a specified correlation.
+The correlation will be exactly the one specified. The used method is described here: https://stats.stackexchange.com/questions/15011/generate-a-random-variable-with-a-defined-correlation-to-an-existing-variables/15040#15040
 }
 \examples{
 pop <- create_pop(0.5, 100000)
