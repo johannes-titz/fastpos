@@ -20,6 +20,18 @@ NULL
 #' @keywords internal
 "_PACKAGE"
 
+#' Stops execution without giving error
+#'
+#' This is useful to have a consistent behavior when the user interrupts
+#' function execution but this interruption is not catched by C++. If this
+#' happens nothing is returned. But if C++ catches the interrupt, we need to
+#' stop execution ourselves (and also return nothing).
+#' @noRd
+stop_quietly <- function() {
+  blankMsg <- sprintf("\r%s\r", paste(rep("", getOption("width")-1L), collapse=" "));
+  stop(simpleError(blankMsg));
+}
+
 #' Creates a population with a specified correlation.
 #'
 #' @param rho Population correlation.
@@ -106,6 +118,9 @@ find_one_critical_pos <- function(rho, sample_size_min = 20,
   # create dist of pos
   res <- simulate_pos(x, y, n_studies, sample_size_min, sample_size_max, T,
                        lower_limit, upper_limit)
+  # on interruption, C++ will return -1 (if R interrupts by itself, nothing
+  # will be returned, it just stops)
+  if (res == -1) stop_quietly()
   names(res) <- unlist(paste("study ", 1:length(res)))
   n_not_breached <- sum(is.na(res))
 
