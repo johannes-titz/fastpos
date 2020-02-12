@@ -3,9 +3,9 @@ cpos <- find_critical_pos(rho = c(.1, .7), sample_size_max = 1000,
                           n_studies = 40000)
 sim <- find_critical_pos(rho = .5, precision_rel = T)
 
-# cpos_old <- read.csv("tests/testthat/cpos3.csv")
-# write.csv(cpos, "tests/testthat/cpos3.csv", row.names = F)
-cpos_old <- read.csv("cpos3.csv")
+# cpos_old <- read.csv("tests/testthat/cpos4.csv")
+# write.csv(cpos, "tests/testthat/cpos4.csv", row.names = F)
+cpos_old <- read.csv("cpos4.csv")
 test_that("previous values can be reproduced", {
   expect_equal(cpos, cpos_old, check.attributes = F)
 })
