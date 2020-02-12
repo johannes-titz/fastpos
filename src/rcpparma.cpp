@@ -109,7 +109,8 @@ int simulate_one_pos(NumericVector x_pop,
 //' @param replace Whether drawing samples is with replacement or not.
 //' @param sample_size_max How many participants to draw at maximum.
 //' @param number_of_studies How many studies to conduct.
-//' @param sample_size_min Minimum sample size to start in corridor of stability.
+//' @param sample_size_min Minimum sample size to start in corridor of
+//'   stability.
 //' @return Vector of sample sizes at which corridor of stability was reached.
 //' @examples
 //' pop <- fastpos::create_pop(0.5, 1000000)

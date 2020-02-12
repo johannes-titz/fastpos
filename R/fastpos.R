@@ -50,10 +50,11 @@ create_pop_inexact <- function(rho, size){
   pop
 }
 
-
 #' Creates a population with a specified correlation.
 #'
-#' The correlation will be exactly the one specified. The used method is described here: https://stats.stackexchange.com/questions/15011/generate-a-random-variable-with-a-defined-correlation-to-an-existing-variables/15040#15040
+#' The correlation will be exactly the one specified. The used method is
+#' described here:
+#' https://stats.stackexchange.com/questions/15011/generate-a-random-variable-with-a-defined-correlation-to-an-existing-variables/15040#15040
 #'
 #' @param rho Population correlation.
 #' @param size Population size.
@@ -148,7 +149,8 @@ find_one_critical_pos <- function(rho, sample_size_min = 20,
 #' @param rhos Vector of population correlations (can also be a single
 #'   correlation).
 #' @param precision Precision around the correlation which is acceptable
-#'   (defaults to 0.1). The precision will determine the corridor of stability which is just rho+-precision.
+#'   (defaults to 0.1). The precision will determine the corridor of stability
+#'   which is just rho+-precision.
 #' @param precision_rel Whether the precision is absolute (rho+-precision or
 #'   relative rho+-rho*precision), boolean (defaults to FALSE).
 #' @param n_studies Number of studies to run for each rho (defaults to 10e3).
