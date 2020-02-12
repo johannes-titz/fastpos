@@ -67,10 +67,6 @@ create_pop <- function(rho, size) {
   x <- stats::rnorm(size)
   y.perp <- stats::residuals(stats::lm(x ~ y))
   x <- rho * stats::sd(y.perp) * y + y.perp * stats::sd(y) * sqrt(1 - rho^2)
-  y <- stats::rnorm(size)
-  x <- stats::rnorm(size)
-  y.perp <- stats::residuals(stats::lm(x ~ y))
-  x <- rho * stats::sd(y.perp) * y + y.perp * stats::sd(y) * sqrt(1 - rho^2)
   matrix(c(x, y), ncol = 2)
 }
 
