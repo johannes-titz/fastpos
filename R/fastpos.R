@@ -120,7 +120,9 @@ find_one_critical_pos <- function(rho, sample_size_min = 20,
                        lower_limit, upper_limit)
   # on interruption, C++ will return -1 (if R interrupts by itself, nothing
   # will be returned, it just stops)
-  if (res == -1) stop_quietly()
+  if (length(res) == 1) {
+    if (res == -1) stop_quietly()
+  }
   names(res) <- unlist(paste("study ", 1:length(res)))
   n_not_breached <- sum(is.na(res))
 
