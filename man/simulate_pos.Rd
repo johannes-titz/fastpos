@@ -20,9 +20,10 @@ simulate_pos(
 
 \item{y_pop}{Second vector of population.}
 
-\item{number_of_studies}{How many studies to conduct.}
+\item{n_studies}{How many studies to conduct.}
 
-\item{sample_size_min}{Minimum sample size to start in corridor of stability.}
+\item{sample_size_min}{Minimum sample size to start in corridor of
+stability.}
 
 \item{sample_size_max}{How many participants to draw at maximum.}
 

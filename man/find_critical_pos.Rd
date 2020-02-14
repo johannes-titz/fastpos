@@ -20,7 +20,8 @@ find_critical_pos(
 correlation).}
 
 \item{precision}{Precision around the correlation which is acceptable
-(defaults to 0.1). The precision will determine the corridor of stability which is just rho+-precision.}
+(defaults to 0.1). The precision will determine the corridor of stability
+which is just rho+-precision.}
 
 \item{precision_rel}{Whether the precision is absolute (rho+-precision or
 relative rho+-rho*precision), boolean (defaults to FALSE).}
@@ -49,6 +50,6 @@ priori specified interval and stay in this interval if the sample size is
 increased further.
 }
 \examples{
-find_critical_pos(rho = 0.5)
-find_critical_pos(rho = c(0.4, 0.5))
+find_critical_pos(rhos = 0.5)
+find_critical_pos(rhos = c(0.4, 0.5))
 }
