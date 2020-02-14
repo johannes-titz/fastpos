@@ -7,7 +7,7 @@
 simulate_pos(
   x_pop,
   y_pop,
-  number_of_studies,
+  n_studies,
   sample_size_min,
   sample_size_max,
   replace,

@@ -25,20 +25,20 @@ BEGIN_RCPP
 END_RCPP
 }
 // simulate_pos
-IntegerVector simulate_pos(NumericVector x_pop, NumericVector y_pop, int number_of_studies, int sample_size_min, int sample_size_max, bool replace, float lower_limit, float upper_limit);
-RcppExport SEXP _fastpos_simulate_pos(SEXP x_popSEXP, SEXP y_popSEXP, SEXP number_of_studiesSEXP, SEXP sample_size_minSEXP, SEXP sample_size_maxSEXP, SEXP replaceSEXP, SEXP lower_limitSEXP, SEXP upper_limitSEXP) {
+IntegerVector simulate_pos(NumericVector x_pop, NumericVector y_pop, int n_studies, int sample_size_min, int sample_size_max, bool replace, float lower_limit, float upper_limit);
+RcppExport SEXP _fastpos_simulate_pos(SEXP x_popSEXP, SEXP y_popSEXP, SEXP n_studiesSEXP, SEXP sample_size_minSEXP, SEXP sample_size_maxSEXP, SEXP replaceSEXP, SEXP lower_limitSEXP, SEXP upper_limitSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
     Rcpp::traits::input_parameter< NumericVector >::type x_pop(x_popSEXP);
     Rcpp::traits::input_parameter< NumericVector >::type y_pop(y_popSEXP);
-    Rcpp::traits::input_parameter< int >::type number_of_studies(number_of_studiesSEXP);
+    Rcpp::traits::input_parameter< int >::type n_studies(n_studiesSEXP);
     Rcpp::traits::input_parameter< int >::type sample_size_min(sample_size_minSEXP);
     Rcpp::traits::input_parameter< int >::type sample_size_max(sample_size_maxSEXP);
     Rcpp::traits::input_parameter< bool >::type replace(replaceSEXP);
     Rcpp::traits::input_parameter< float >::type lower_limit(lower_limitSEXP);
     Rcpp::traits::input_parameter< float >::type upper_limit(upper_limitSEXP);
-    rcpp_result_gen = Rcpp::wrap(simulate_pos(x_pop, y_pop, number_of_studies, sample_size_min, sample_size_max, replace, lower_limit, upper_limit));
+    rcpp_result_gen = Rcpp::wrap(simulate_pos(x_pop, y_pop, n_studies, sample_size_min, sample_size_max, replace, lower_limit, upper_limit));
     return rcpp_result_gen;
 END_RCPP
 }

@@ -29,7 +29,7 @@ simulate_one_pos <- function(x_pop, y_pop, index_pop, sample_size_min, sample_si
 #' @param upper_limit Upper limit of corridor of stability.
 #' @param replace Whether drawing samples is with replacement or not.
 #' @param sample_size_max How many participants to draw at maximum.
-#' @param number_of_studies How many studies to conduct.
+#' @param n_studies How many studies to conduct.
 #' @param sample_size_min Minimum sample size to start in corridor of
 #'   stability.
 #' @return Vector of sample sizes at which corridor of stability was reached.
@@ -37,7 +37,7 @@ simulate_one_pos <- function(x_pop, y_pop, index_pop, sample_size_min, sample_si
 #' pop <- fastpos::create_pop(0.5, 1000000)
 #' simulate_pos(pop[,1], pop[,2], 100, 20, 1000, TRUE, 0.4, 0.6)
 #' @export
-simulate_pos <- function(x_pop, y_pop, number_of_studies, sample_size_min, sample_size_max, replace, lower_limit, upper_limit) {
-    .Call('_fastpos_simulate_pos', PACKAGE = 'fastpos', x_pop, y_pop, number_of_studies, sample_size_min, sample_size_max, replace, lower_limit, upper_limit)
+simulate_pos <- function(x_pop, y_pop, n_studies, sample_size_min, sample_size_max, replace, lower_limit, upper_limit) {
+    .Call('_fastpos_simulate_pos', PACKAGE = 'fastpos', x_pop, y_pop, n_studies, sample_size_min, sample_size_max, replace, lower_limit, upper_limit)
 }
 

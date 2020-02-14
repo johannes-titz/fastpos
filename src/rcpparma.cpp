@@ -108,7 +108,7 @@ int simulate_one_pos(NumericVector x_pop,
 //' @param upper_limit Upper limit of corridor of stability.
 //' @param replace Whether drawing samples is with replacement or not.
 //' @param sample_size_max How many participants to draw at maximum.
-//' @param number_of_studies How many studies to conduct.
+//' @param n_studies How many studies to conduct.
 //' @param sample_size_min Minimum sample size to start in corridor of
 //'   stability.
 //' @return Vector of sample sizes at which corridor of stability was reached.
@@ -119,20 +119,20 @@ int simulate_one_pos(NumericVector x_pop,
 // [[Rcpp::export]]
 IntegerVector simulate_pos(NumericVector x_pop,
                            NumericVector y_pop,
-                           int number_of_studies,
+                           int n_studies,
                            int sample_size_min,
                            int sample_size_max,
                            bool replace,
                            float lower_limit,
                            float upper_limit){
-  IntegerVector ret(number_of_studies);
+  IntegerVector ret(n_studies);
   int npop = x_pop.size();
   NumericVector index_pop(npop);
   for (int i = 0; i < npop; i++){
     index_pop[i] = i;
   }
-  Progress p(number_of_studies, true);
-  for (int k = 0; k < number_of_studies; k++){
+  Progress p(n_studies, true);
+  for (int k = 0; k < n_studies; k++){
     if (k % 5000 == 0){
       if (Progress::check_abort()){
         return(IntegerVector::create(-1));
