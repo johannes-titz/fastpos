@@ -1,4 +1,15 @@
-#
+# fastpos 0.3.0
+
+* Parameter for number of studies is now always n_studies. Some lower level
+functions used number_of_studies.
+* create_pop now creates a bivariate normal distribution with an exact rho, this
+is slower than previously, but it is probably worth it.
+* Problems with C++ progressbar (RcppProgress) were fixed. The code should also
+be cleaner now. 
+* Make C++ and Rstudio interruption similar: depending on the
+timing, either Rstudio interrupts by itself and stops everything or C++ returns
+a value. In the latter case, R now also stops quietly.
+* Since the interrupts cannot be properly tested, code coverage is only 90%.
 
 # fastpos 0.2.0
 
