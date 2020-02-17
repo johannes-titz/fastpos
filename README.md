@@ -40,7 +40,7 @@ to the problem and a simulation approach is computationally expensive.
 The package *fastpos* overcomes this limitation by speeding up the
 calculation of correlations. For typical parameters, the theoretical
 speedup should be at least around 250. An empirical benchmark for a
-typical scenario even shows a speedup of about 500, paving the way for a
+typical scenario even shows a speedup of about 400, paving the way for a
 wider usage of the *stability* approach.
 
 ## Installation
@@ -297,7 +297,7 @@ factors that might play a role, but they cannot account for the large
 difference found. For instance, setting up a population takes quite long
 in *corEvol* (about 20s), but compared to the \~9min required overall,
 this is only a small fraction. There are other parts of the *corEvol*
-code that are fated to be slow, but again, a speedup by a factor of 500
+code that are fated to be slow, but again, a speedup by a factor of 400
 cannot be achieved by improving these parts. The presented benchmark is
 definitely not comprehensive, but only demonstrates that *fastpos* can
 be used with no significant waiting time for a typical scenario, while
