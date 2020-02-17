@@ -164,7 +164,7 @@ find_one_critical_pos <- function(rho, sample_size_min = 20,
 #'   points of stability.
 #' @examples
 #' find_critical_pos(rhos = 0.5)
-#' find_critical_pos(rhos = c(0.4, 0.5))
+#' find_critical_pos(rhos = c(0.4, 0.5), n_studies = 1e3)
 #' @export
 find_critical_pos <- function(rhos, precision = 0.1, precision_rel = FALSE,
                               sample_size_min = 20, sample_size_max = 1000,

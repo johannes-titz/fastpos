@@ -51,5 +51,5 @@ increased further.
 }
 \examples{
 find_critical_pos(rhos = 0.5)
-find_critical_pos(rhos = c(0.4, 0.5))
+find_critical_pos(rhos = c(0.4, 0.5), n_studies = 1e3)
 }
