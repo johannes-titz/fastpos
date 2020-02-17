@@ -84,17 +84,17 @@ reduce the number of studies to 10k so that it runs fairly quickly.
 ``` r
 find_critical_pos(rho = seq(.1, .7, .1), sample_size_max = 1000,
                   n_studies = 10000)
-#> Warning in find_critical_pos(rho = seq(0.1, 0.7, 0.1), sample_size_max = 1000, : 32 simulation[s] did not reach the corridor of
+#> Warning in find_critical_pos(rho = seq(0.1, 0.7, 0.1), sample_size_max = 1000, : 37 simulation[s] did not reach the corridor of
 #>             stability.
 #> Increase sample_size_max and rerun the simulation.
-#>      rho_pop 80% 90%    95% sample_size_min sample_size_max lower_limit upper_limit n_studies n_not_breached precision
-#> 1 0.09908227 253 359 476.00              20            1000         0.0         0.2     10000             11       0.1
-#> 2 0.19993267 234 338 457.00              20            1000         0.1         0.3     10000             14       0.1
-#> 3 0.29982634 212 300 396.05              20            1000         0.2         0.4     10000              5       0.1
-#> 4 0.39933030 182 262 342.00              20            1000         0.3         0.5     10000              2       0.1
-#> 5 0.50035764 139 204 270.00              20            1000         0.4         0.6     10000              0       0.1
-#> 6 0.59961802 104 151 201.00              20            1000         0.5         0.7     10000              0       0.1
-#> 7 0.69905041  65  96 128.05              20            1000         0.6         0.8     10000              0       0.1
+#>   rho_pop 80%   90%    95% sample_size_min sample_size_max lower_limit upper_limit n_studies n_not_breached precision
+#> 1     0.1 253 361.0 479.05              20            1000         0.0         0.2     10000             14       0.1
+#> 2     0.2 237 339.0 445.00              20            1000         0.1         0.3     10000             16       0.1
+#> 3     0.3 212 304.1 402.00              20            1000         0.2         0.4     10000              5       0.1
+#> 4     0.4 184 261.0 346.00              20            1000         0.3         0.5     10000              1       0.1
+#> 5     0.5 142 205.1 273.00              20            1000         0.4         0.6     10000              0       0.1
+#> 6     0.6 103 147.0 200.00              20            1000         0.5         0.7     10000              1       0.1
+#> 7     0.7  64  96.0 127.05              20            1000         0.6         0.8     10000              0       0.1
 #>   precision_rel
 #> 1         FALSE
 #> 2         FALSE
@@ -123,7 +123,7 @@ right?). A rawish approach would be to create a population with
 pop <- create_pop(0.5, 1000000)
 pos <- simulate_pos(x_pop = pop[,1],
                     y_pop = pop[,2],
-                    number_of_studies = 10000,
+                    n_studies = 10000,
                     sample_size_min = 20,
                     sample_size_max = 1000,
                     replace = T,
@@ -137,8 +137,8 @@ hist(pos, xlim = c(0, 1000), xlab = c("Point of stability"),
 
 ``` r
 quantile(pos, c(.8, .9, .95), na.rm = T)
-#>    80%    90%    95% 
-#> 142.00 205.00 274.05
+#> 80% 90% 95% 
+#> 141 208 276
 ```
 
 Note that no warning message appears if the corridor is not reached, but
@@ -179,7 +179,7 @@ maximum one. Thus, the total number of added terms for one sum is:
 ![\\sum \_{n\_{min}}^{n\_{max}}n = \\sum\_{n=1}^{n\_{max}}n -
 \\sum\_{n=1}^{n\_{min}-1}n = n\_{max}(n\_{max}+1)/2
 -(n\_{min}-1)(n\_{min}-1+1)/2](https://latex.codecogs.com/png.latex?%5Csum%20_%7Bn_%7Bmin%7D%7D%5E%7Bn_%7Bmax%7D%7Dn%20%3D%20%5Csum_%7Bn%3D1%7D%5E%7Bn_%7Bmax%7D%7Dn%20-%20%5Csum_%7Bn%3D1%7D%5E%7Bn_%7Bmin%7D-1%7Dn%20%3D%20n_%7Bmax%7D%28n_%7Bmax%7D%2B1%29%2F2%20-%28n_%7Bmin%7D-1%29%28n_%7Bmin%7D-1%2B1%29%2F2
-"\\sum _{n_{min}}^{n_{max}}n = \\sum_{n=1}^{n_{max}}n - \\sum_{n=1}^{n_{min}-1}n = n_{max}(n_{max}+1)/2 -(n_{min}-1)(n_{min}-1+1)/2")
+"\\sum _{n_{min}}^{n_{max}}n = \\sum_{n=1}^{n_{max}}n - \\sum_{n=1}^{n_{min}-1}n = n_{max}(n_{max}+1)/2 -(n_{min}-1)(n_{min}-1+1)/2")  
 
 On the other hand, *fastpos* calculates the correlation for the maximum
 sample size first. This requires to add
@@ -247,7 +247,7 @@ bm <- microbenchmark(corevol = corevol(),
                      fastpos = find_critical_pos(rho = .1,
                                                  sample_size_max = 1000,
                                                  n_studies = 10000),
-                     times = 10)
+                     times = 10, unit = "s")
 #> [1] "Analyzing rho = 0.1"
 #>   rho 0.8_0.1 0.9_0.1 0.95_0.1
 #> 1 0.1     249     355      471
@@ -280,12 +280,12 @@ bm <- microbenchmark(corevol = corevol(),
 #> 1 0.1     250     364      469
 bm
 #> Unit: seconds
-#>     expr        min         lq       mean     median         uq        max neval cld
-#>  corevol 518.397379 524.152544 549.926103 528.534388 544.880965 708.257171    10   b
-#>  fastpos   1.046439   1.056543   1.103868   1.078956   1.179585   1.201184    10  a
+#>     expr        min         lq      mean    median         uq        max neval
+#>  corevol 604.205445 609.666951 611.74153 611.75420 613.710455 616.786979    10
+#>  fastpos   1.388725   1.437223   1.53216   1.50323   1.599481   1.782225    10
 ```
 
-For the chosen parameters, *fastpos* is about 500 times faster than
+For the chosen parameters, *fastpos* is about 400 times faster than
 *corEvol*, for which there are two main reasons: (1) *fastpos* is built
 around a C++ function via *Rcpp* and (2) this function does not
 calculate every calculation from scratch, but only calculates the
@@ -307,7 +307,7 @@ by a factor of 250 was clearly exceeded.
 One might think that *corEvol* can work with more than one core out of
 the box. But it is quite easy to also parallelize *fastpos*, for
 instance with *mclapply* from the *parallel* package. Furthermore, even
-a parallelized version of *corEvol* would need more than 500 cores to
+a parallelized version of *corEvol* would need more than 400 cores to
 compete with *fastpos*. Overall, the speedup should be evident and will
 hopefully pave the way for a wider usage of the *stability* approach for
 sample size planning.
@@ -382,7 +382,7 @@ correlations stabilize? *Journal of Research in Personality*, *47*,
 <div id="ref-schonbrodt2018">
 
 Schönbrodt, F. D., & Perugini, M. (2018). Corrigendum to “At What Sample
-Size Do Correlations Stabilize?” [J. Res. Pers. 47 (2013) 609–612].
+Size Do Correlations Stabilize?” \[J. Res. Pers. 47 (2013) 609–612\].
 *Journal of Research in Personality*, *74*, 194.
 <https://doi.org/10.1016/j.jrp.2018.02.010>
 
