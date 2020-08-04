@@ -12,7 +12,8 @@ simulate_pos(
   sample_size_max,
   replace,
   lower_limit,
-  upper_limit
+  upper_limit,
+  n_threads
 )
 }
 \arguments{

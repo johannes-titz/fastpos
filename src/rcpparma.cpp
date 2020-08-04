@@ -6,6 +6,7 @@
 using namespace Rcpp;
 
 // [[Rcpp::depends(RcppProgress)]]
+
 #include <progress.hpp>
 #include <progress_bar.hpp>
 //
@@ -13,6 +14,9 @@ using namespace Rcpp;
 // RcppArmadillo so that the build process will know what to do
 //
 // [[Rcpp::depends(RcppArmadillo)]]
+
+// [[Rcpp::depends(RcppThread)]]
+#include <RcppThread.h>
 
 //' Run a single sequential study to find a critical n.
 //' @param x_pop First vector of population.
@@ -70,7 +74,7 @@ int simulate_one_pos(NumericVector x_pop,
   // if the correlation is outside for the whole sample, there is no
   // point of stability (sample size is too small)
   if ((corr < lower_limit) | (corr > upper_limit)) {
-    n = NA_INTEGER;
+    n = 99;
   } else {
   while ((corr >= lower_limit) & (corr <= upper_limit) & (n > sample_size_min)) {
     // use formula for calculating correlation coefficient.
@@ -117,31 +121,61 @@ int simulate_one_pos(NumericVector x_pop,
 //' simulate_pos(pop[,1], pop[,2], 100, 20, 1000, TRUE, 0.4, 0.6)
 //' @export
 // [[Rcpp::export]]
-IntegerVector simulate_pos(NumericVector x_pop,
-                           NumericVector y_pop,
-                           int n_studies,
-                           int sample_size_min,
-                           int sample_size_max,
-                           bool replace,
-                           float lower_limit,
-                           float upper_limit){
-  IntegerVector ret(n_studies);
+std::vector<int> simulate_pos(NumericVector x_pop,
+                              NumericVector y_pop,
+                              int n_studies,
+                              int sample_size_min,
+                              int sample_size_max,
+                              bool replace,
+                              float lower_limit,
+                              float upper_limit,
+                              int n_threads){
+  std::vector<int> pos(n_studies);
   int npop = x_pop.size();
   NumericVector index_pop(npop);
   for (int i = 0; i < npop; i++){
     index_pop[i] = i;
   }
-  Progress p(n_studies, true);
-  for (int k = 0; k < n_studies; k++){
-    if (k % 5000 == 0){
-      if (Progress::check_abort()){
-        return(IntegerVector::create(-1));
-      }
-    }
-    p.increment();
-    ret[k] = simulate_one_pos(x_pop, y_pop, index_pop, sample_size_min,
+
+  RcppThread::parallelFor(0, pos.size(), [&] (int i){
+    pos[i] = simulate_one_pos(x_pop, y_pop, index_pop, sample_size_min,
                               sample_size_max, replace, lower_limit,
                               upper_limit);
+  });
+  return(pos);
+}
+
+//' @export
+// [[Rcpp::export]]
+std::vector<int> simulate_pos2(NumericVector x_pop,
+                               NumericVector y_pop,
+                               int n_studies,
+                               int sample_size_min,
+                               int sample_size_max,
+                               bool replace,
+                               float lower_limit,
+                               float upper_limit,
+                               int n_cores){
+  int npop = x_pop.size();
+  NumericVector index_pop(npop);
+  for (int i = 0; i < npop; i++){
+    index_pop[i] = i;
   }
-  return(ret);
+
+  RcppThread::ThreadPool pool;
+  auto task = [x_pop, y_pop, index_pop, sample_size_min, sample_size_max, replace, lower_limit, upper_limit] (int i) {
+    int result;
+    result = simulate_one_pos(x_pop, y_pop, index_pop, sample_size_min,
+                              sample_size_max, replace, lower_limit, upper_limit);
+    return result;
+  };
+
+  std::vector<std::future<int>> futures(n_studies);
+  std::vector<int> results(n_studies);
+  for (unsigned int i = 0; i < n_studies; ++i)
+    futures[i] = pool.pushReturn(task, i);
+  for (unsigned int i = 0; i < n_studies; ++i)
+    results[i] = futures[i].get();
+  pool.join();
+  return(results);
 }
