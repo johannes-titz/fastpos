@@ -28,7 +28,8 @@ NULL
 #' stop execution ourselves (and also return nothing).
 #' @noRd
 stop_quietly <- function() {
-  blankMsg <- sprintf("\r%s\r", paste(rep("", getOption("width")-1L), collapse=" "));
+  blankMsg <- sprintf("\r%s\r", paste(rep("", getOption("width")-1L),
+                                      collapse=" "));
   stop(simpleError(blankMsg));
 }
 
