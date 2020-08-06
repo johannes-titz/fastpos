@@ -113,8 +113,27 @@ find_one_critical_pos <- function(rho, sample_size_min = 20,
   rho_pop <- stats::cor(x, y)
 
   # create dist of pos
-  res <- simulate_pos(x, y, n_studies, sample_size_min, sample_size_max, T,
-                       lower_limit, upper_limit)
+
+  # we will use 1 normal invocation and n_cores - 1 futures, this way we have
+  # a progress bar
+  if (n_cores > 1){
+    #future::plan(multisession)
+    f <- list()
+    for (ii in seq(n_cores - 1)) {
+      f[[ii]] <- future::future({
+        simulate_pos(x, y, ceiling(n_studies/(n_cores)), sample_size_min,
+                     sample_size_max, replace, lower_limit, upper_limit)
+      })
+    }
+    res <- simulate_pos(x, y, ceiling(n_studies/n_cores), sample_size_min,
+                        sample_size_max, replace, lower_limit, upper_limit)
+    v <- unlist(lapply(f, FUN = future::value))
+    res <- c(res, v)
+  } else {
+    res <- simulate_pos(x, y, n_studies, sample_size_min, sample_size_max, T,
+                        lower_limit, upper_limit)
+  }
+
   # on interruption, C++ will return -1 (if R interrupts by itself, nothing
   # will be returned, it just stops)
   if (length(res) == 1) {
@@ -132,7 +151,7 @@ find_one_critical_pos <- function(rho, sample_size_min = 20,
                           sample_size_max = sample_size_max,
                           lower_limit=lower_limit,
                           upper_limit=upper_limit,
-                          n_studies = n_studies,
+                          n_studies = length(res),
                           n_not_breached = n_not_breached),
               n = res
               ))
@@ -170,13 +189,17 @@ find_critical_pos <- function(rhos, precision = 0.1, precision_rel = FALSE,
                               sample_size_min = 20, sample_size_max = 1000,
                               n_studies = 10000,
                               confidence_levels = c(.8, .9, .95),
-                              pop_size = 1e6) {
+                              pop_size = 1e6,
+                              n_cores = 1) {
+  defaultplan <- options("future.plan")[[1]]
+  options("future.plan" = "multisession")
   result <- mapply(find_one_critical_pos, rhos,
                    sample_size_max = sample_size_max,
                    sample_size_min = sample_size_min,
                    n_studies = n_studies,
                    precision = precision,
                    precision_rel = precision_rel,
+                   n_cores = n_cores,
                    MoreArgs = list(confidence_levels = confidence_levels),
                    SIMPLIFY = F)
   summary <- lapply(result, function(x) x[[1]])
@@ -188,6 +211,7 @@ find_critical_pos <- function(rhos, precision = 0.1, precision_rel = FALSE,
             stability", ".\nIncrease sample_size_max and rerun the simulation.",
             sep = "")
   }
+  options("future.plan" = defaultplan)
   summary
 }
 
