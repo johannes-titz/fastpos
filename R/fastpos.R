@@ -74,16 +74,7 @@ create_pop <- function(rho, size) {
 #' Run simulation for one specific correlation.
 #'
 #' @param rho Population correlation.
-#' @param pop_size Population size.
-#' @param sample_size_max Number of participants for each study.
-#' @param n_studies Number of studies to run.
-#' @param precision Precision around the correlation which is acceptable
-#' @param precision_rel Whether the precision is absolute (rho+-precision or
-#'   relative rho+-rho*precision).
-#' @param sample_size_min Minimum sample size to start in corridor of stability.
-#' @param confidence_levels Confidence levels for point of stability. This
-#'   corresponds to the quantile of the distribution of all found critical
-#'   sample sizes. Defaults to c(.8, .9, .95).
+#' @inheritParams find_critical_pos
 #' @return A list with two elements, (1) a data frame called "summary"
 #'   containing all the above information as well as the critical sample sizes
 #'   (points of stability) for the confidence-levels specified and (2) vector
@@ -93,10 +84,12 @@ create_pop <- function(rho, size) {
 #' find_one_critical_pos(rho = 0.5)
 #' @noRd
 find_one_critical_pos <- function(rho, sample_size_min = 20,
-                                  sample_size_max = 1000, n_studies = 1000,
+                                  sample_size_max = 1000,
+                                  replace = TRUE, n_studies = 1000,
                                   pop_size = 1e6, precision = .1,
                                   precision_rel = T,
-                                  confidence_levels = c(.8, .9, .95)) {
+                                  confidence_levels = c(.8, .9, .95),
+                                  n_cores = 1) {
   # create corridor of stability
   if (precision_rel) {
     limits <- rho * (1 + c(-1, 1) * precision)
@@ -175,10 +168,12 @@ find_one_critical_pos <- function(rho, sample_size_min = 20,
 #' @param n_studies Number of studies to run for each rho (defaults to 10e3).
 #' @param sample_size_min Minimum sample size for each study (defaults to 20).
 #' @param sample_size_max Maximum sample size for each study (defaults to 1e3).
+#' @param replace Whether drawing samples is with replacement or not.
 #' @param confidence_levels Confidence levels for point of stability. This
 #'   corresponds to the quantile of the distribution of all found critical
 #'   sample sizes (defaults to c(.8, .9, .95)).
 #' @param pop_size Population size (defaults to 1e6).
+#' @param n_cores Number of cores to use for simulation.
 #' @return A data frame containing all the above information, as well as the
 #'   points of stability.
 #' @examples
@@ -187,6 +182,7 @@ find_one_critical_pos <- function(rho, sample_size_min = 20,
 #' @export
 find_critical_pos <- function(rhos, precision = 0.1, precision_rel = FALSE,
                               sample_size_min = 20, sample_size_max = 1000,
+                              replace = TRUE,
                               n_studies = 10000,
                               confidence_levels = c(.8, .9, .95),
                               pop_size = 1e6,
