@@ -58,3 +58,5 @@ test_that("relative precision works",
           expect_equal(c(sim$lower_limit, sim$upper_limit), c(.45, .55)))
 
 
+test_that("create_pop_inexact (not used atm) works",
+          expect_equal(round(cor(create_pop_inexact(0.5, 1e6))[1,2], 2), 0.50))
