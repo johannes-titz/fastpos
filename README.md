@@ -27,19 +27,23 @@ assumption that the population correlation is .5). This sample size is
 also referred to as the *critical point of stability* for the specific
 parameters.
 
-This approach is related to accuracy in parameter estimation (AIPE,
-e.g. Maxwell, Kelley, & Rausch, 2008) and as such can be seen as an
-alternative to power analysis. Unlike AIPE, the concept of *stability*
-incorporates the idea of sequentially adding participants to a study.
-Although the approach is young, it has already attracted a lot of
-interest in the psychological research community, which is evident in
-over 600 citations of the original publication (Schönbrodt & Perugini,
-2013). To date there exists no easy way to use sequential stability for
+This approach is related to the AO-method of sample size planning
+(e.g. Algina & Olejnik, 2003) and as such can be seen as an alternative
+to power analysis. Unlike AO, the concept of *stability* incorporates
+the idea of sequentially adding participants to a study. Although the
+approach is young, it has already attracted a lot of interest in the
+psychological research community, which is evident in over 800 citations
+of the original publication (Schönbrodt & Perugini, 2013). Still, to
+date, there exists no easy way to use the stability approach for
 individual sample size planning because there is no analytical solution
-to the problem and a simulation approach is computationally expensive.
-The package *fastpos* overcomes this limitation by speeding up the
-calculation of correlations. For typical parameters, the theoretical
-speedup should be at least around 250. An empirical benchmark for a
+to the problem and a simulation approach is computationally expensive
+with
+![\\mathcal{O}(n^2)](https://latex.codecogs.com/png.latex?%5Cmathcal%7BO%7D%28n%5E2%29
+"\\mathcal{O}(n^2)"). The presented package overcomes this limitation by
+speeding up the calculation of correlations and achieving
+![\\mathcal{O}(n)](https://latex.codecogs.com/png.latex?%5Cmathcal%7BO%7D%28n%29
+"\\mathcal{O}(n)"). For typical parameters, the theoretical speedup
+should be at least around a factor of 250. An empirical benchmark for a
 typical scenario even shows a speedup of about 400, paving the way for a
 wider usage of the *stability* approach.
 
@@ -53,20 +57,19 @@ install.packages("fastpos")
 ```
 
 You can install the development version from
-[GitHub](https://github.com/) with devtools (and vignettes build, this
-takes a couple of seconds longer):
+[GitHub](https://github.com/) with devtools:
 
 ``` r
-devtools::install_github("johannes-titz/fastpos", build_vignettes = TRUE)
+devtools::install_github("johannes-titz/fastpos")
 ```
 
 ## Using *fastpos*
 
-If you have found this page, I assume you either want to (1) calculate
-the critical point of stability for your own study or (2) explore the
-method in general. If this is the case, read on and you should find what
-you are looking for. Let us first load the package and set a seed for
-reproducibility:
+Since you have found this page, I assume you either want to (1)
+calculate the critical point of stability for your own study or (2)
+explore the method in general. If this is the case, read on and you
+should find what you are looking for. Let us first load the package and
+set a seed for reproducibility:
 
 ``` r
 library(fastpos)
@@ -82,8 +85,8 @@ table of the critical points of stability for a precision of 0.1. We
 reduce the number of studies to 10k so that it runs fairly quickly.
 
 ``` r
-find_critical_pos(rho = seq(.1, .7, .1), sample_size_max = 1000,
-                  n_studies = 10000)
+find_critical_pos(rho = seq(.1, .7, .1), sample_size_max = 1e3,
+                  n_studies = 10e3)
 #> Warning in find_critical_pos(rho = seq(0.1, 0.7, 0.1), sample_size_max = 1000, : 37 simulation[s] did not reach the corridor of
 #>             stability.
 #> Increase sample_size_max and rerun the simulation.
@@ -120,16 +123,16 @@ right?). A rawish approach would be to create a population with
 **create\_pop** and pass it to **simulate\_pos**:
 
 ``` r
-pop <- create_pop(0.5, 1000000)
+pop <- create_pop(0.5, 1e6)
 pos <- simulate_pos(x_pop = pop[,1],
                     y_pop = pop[,2],
-                    n_studies = 10000,
+                    n_studies = 1e4,
                     sample_size_min = 20,
-                    sample_size_max = 1000,
+                    sample_size_max = 1e3,
                     replace = T,
                     lower_limit = 0.4,
                     upper_limit = 0.6)
-hist(pos, xlim = c(0, 1000), xlab = c("Point of stability"),
+hist(pos, xlim = c(0, 1e3), xlab = c("Point of stability"),
      main = "Histogram of points of stability for rho = .5+-.1")
 ```
 
@@ -145,12 +148,70 @@ Note that no warning message appears if the corridor is not reached, but
 instead an NA value is returned. Pay careful attention if you work with
 this function, and adjust the maximum sample size as needed.
 
-**create\_pop** creates the population matrix by using **mvrnorm**. This
-is a much simpler way than Schönbrodt and Perugini’s approach, but the
-results do not seem to differ. If you are interested in how population
-parameters (e.g. skewness) affect the point of stability, you should
-instead refer to the population generating functions in Schönbrodt and
-Perugini’s work.
+**create\_pop** creates the population matrix by using a method
+described on SO
+(<https://stats.stackexchange.com/questions/15011/generate-a-random-variable-with-a-defined-correlation-to-an-existing-variables/15040#15040>).
+This is a much simpler way than Schönbrodt and Perugini’s approach, but
+the results do not seem to differ. If you are interested in how
+population parameters (e.g. skewness) affect the point of stability, you
+should instead refer to the population generating functions in
+Schönbrodt and Perugini’s work.
+
+## Parallelization
+
+Since version 0.4.0 *fastpos* supports multiple cores. My first attempts
+to implement this were quite unsuccessful because of several reasons:
+(1) Higher-level parallelism in R makes it difficult to show progress in
+C++, which is where the important and time-demanding calculations happen
+(2) some parallelizing solutions do not work on all operating systems
+(e.g. mcpbapply) (3) overhead can be quite large, especially for a small
+number of simulation runs.
+
+I thought the best solution is is to directly parallelize in C++. I
+tried to do it with *RcppThread*, but in the end this was even slower
+than singlethreading. I assume that a more experienced C++ programmer
+could make it work but to me parallelizing in C++ feels a bit like
+torture.
+
+My final solution was quite simple and pragmatic: to use *futures*. I
+divide the number of studies by the available cores
+![n](https://latex.codecogs.com/png.latex?n "n"), then start
+![n-1](https://latex.codecogs.com/png.latex?n-1 "n-1") simulations via
+futures in a multisession plan. Meanwhile the main R process also starts
+a simulation, wich shows a progress bar in C++. All simulations end at
+approximately the same time, the progress bar finishes and the futures
+resolve. The points of stability are combined and the rest of the
+program works as for the singlethreaded version.
+
+Speed benefits are non-existent for a small numbers of studies, since
+*fastpos* is already too fast:
+
+``` r
+onecore <- function() {find_critical_pos(0.5)}
+multicore <- function() {find_critical_pos(0.5, n_cores = future::availableCores())}
+microbenchmark::microbenchmark(onecore(), multicore(), times = 10)
+#> Unit: seconds
+#>         expr      min       lq     mean   median       uq      max neval cld
+#>    onecore() 1.742925 1.880799 2.010636 1.945818 2.133720 2.397736    10   a
+#>  multicore() 1.700849 1.786334 2.058422 1.798521 1.838429 4.336336    10   a
+```
+
+When increasing the number of studies, the benefit becomes visible, but
+the difference is not gigantic:
+
+``` r
+onecore <- function() {find_critical_pos(0.5, n_studies = 1e5)}
+multicore <- function() {find_critical_pos(0.5, n_studies = 1e5, 
+                                           n_cores = future::availableCores())}
+microbenchmark::microbenchmark(onecore(), multicore(),
+                               times = 10)
+#> Unit: seconds
+#>         expr      min       lq     mean   median        uq       max neval cld
+#>    onecore() 9.159248 9.346659 9.767050 9.604174 10.303442 10.417008    10   b
+#>  multicore() 5.391069 5.988821 6.260544 6.511733  6.689804  6.732199    10  a
+```
+
+The test was done on my local computer with 4 cores.
 
 ## How fast is *fastpos*?
 
@@ -176,10 +237,11 @@ terms. This has to be done for every sample size from the minimum to the
 maximum one. Thus, the total number of added terms for one sum is:
 
   
-![\\sum \_{n\_{min}}^{n\_{max}}n = \\sum\_{n=1}^{n\_{max}}n -
-\\sum\_{n=1}^{n\_{min}-1}n = n\_{max}(n\_{max}+1)/2
--(n\_{min}-1)(n\_{min}-1+1)/2](https://latex.codecogs.com/png.latex?%5Csum%20_%7Bn_%7Bmin%7D%7D%5E%7Bn_%7Bmax%7D%7Dn%20%3D%20%5Csum_%7Bn%3D1%7D%5E%7Bn_%7Bmax%7D%7Dn%20-%20%5Csum_%7Bn%3D1%7D%5E%7Bn_%7Bmin%7D-1%7Dn%20%3D%20n_%7Bmax%7D%28n_%7Bmax%7D%2B1%29%2F2%20-%28n_%7Bmin%7D-1%29%28n_%7Bmin%7D-1%2B1%29%2F2
-"\\sum _{n_{min}}^{n_{max}}n = \\sum_{n=1}^{n_{max}}n - \\sum_{n=1}^{n_{min}-1}n = n_{max}(n_{max}+1)/2 -(n_{min}-1)(n_{min}-1+1)/2")  
+![\\sum \_{n\_\\mathrm{min}}^{n\_\\mathrm{max}}n =
+\\sum\_{n=1}^{n\_\\mathrm{max}}n - \\sum\_{n=1}^{n\_\\mathrm{min}-1}n =
+n\_\\mathrm{max}(n\_\\mathrm{max}+1)/2
+-(n\_\\mathrm{min}-1)(n\_\\mathrm{min}-1+1)/2](https://latex.codecogs.com/png.latex?%5Csum%20_%7Bn_%5Cmathrm%7Bmin%7D%7D%5E%7Bn_%5Cmathrm%7Bmax%7D%7Dn%20%3D%20%5Csum_%7Bn%3D1%7D%5E%7Bn_%5Cmathrm%7Bmax%7D%7Dn%20-%20%5Csum_%7Bn%3D1%7D%5E%7Bn_%5Cmathrm%7Bmin%7D-1%7Dn%20%3D%20n_%5Cmathrm%7Bmax%7D%28n_%5Cmathrm%7Bmax%7D%2B1%29%2F2%20-%28n_%5Cmathrm%7Bmin%7D-1%29%28n_%5Cmathrm%7Bmin%7D-1%2B1%29%2F2
+"\\sum _{n_\\mathrm{min}}^{n_\\mathrm{max}}n = \\sum_{n=1}^{n_\\mathrm{max}}n - \\sum_{n=1}^{n_\\mathrm{min}-1}n = n_\\mathrm{max}(n_\\mathrm{max}+1)/2 -(n_\\mathrm{min}-1)(n_\\mathrm{min}-1+1)/2")  
 
 On the other hand, *fastpos* calculates the correlation for the maximum
 sample size first. This requires to add
@@ -190,24 +252,25 @@ which happens repeatedly until the minimum sample size is reached.
 Overall the total number of terms for one sum amounts to:
 
   
-![n\_{max}+n\_{max}-n\_{min}](https://latex.codecogs.com/png.latex?n_%7Bmax%7D%2Bn_%7Bmax%7D-n_%7Bmin%7D
-"n_{max}+n_{max}-n_{min}")  
+![n\_\\mathrm{max}+n\_\\mathrm{max}-n\_\\mathrm{min}](https://latex.codecogs.com/png.latex?n_%5Cmathrm%7Bmax%7D%2Bn_%5Cmathrm%7Bmax%7D-n_%5Cmathrm%7Bmin%7D
+"n_\\mathrm{max}+n_\\mathrm{max}-n_\\mathrm{min}")  
 
 The ratio between the two approaches is:
 
   
-![\\frac{n\_{max}(n\_{max}+1)/2
--(n\_{min}-1)n\_{min}/2}{2n\_{max}-n\_{min}}
-](https://latex.codecogs.com/png.latex?%5Cfrac%7Bn_%7Bmax%7D%28n_%7Bmax%7D%2B1%29%2F2%20-%28n_%7Bmin%7D-1%29n_%7Bmin%7D%2F2%7D%7B2n_%7Bmax%7D-n_%7Bmin%7D%7D%20
-"\\frac{n_{max}(n_{max}+1)/2 -(n_{min}-1)n_{min}/2}{2n_{max}-n_{min}} ")  
+![\\frac{n\_\\mathrm{max}(n\_\\mathrm{max}+1)/2
+-(n\_\\mathrm{min}-1)n\_\\mathrm{min}/2}{2n\_\\mathrm{max}-n\_\\mathrm{min}}
+](https://latex.codecogs.com/png.latex?%5Cfrac%7Bn_%5Cmathrm%7Bmax%7D%28n_%5Cmathrm%7Bmax%7D%2B1%29%2F2%20-%28n_%5Cmathrm%7Bmin%7D-1%29n_%5Cmathrm%7Bmin%7D%2F2%7D%7B2n_%5Cmathrm%7Bmax%7D-n_%5Cmathrm%7Bmin%7D%7D%20
+"\\frac{n_\\mathrm{max}(n_\\mathrm{max}+1)/2 -(n_\\mathrm{min}-1)n_\\mathrm{min}/2}{2n_\\mathrm{max}-n_\\mathrm{min}} ")  
 
 For the typically used
-![n\_{max}](https://latex.codecogs.com/png.latex?n_%7Bmax%7D "n_{max}")
-of 1000 and ![n\_{min}](https://latex.codecogs.com/png.latex?n_%7Bmin%7D
-"n_{min}") of 20, we can expect a speedup of about 250. This is only an
-approximation for several reasons. First, one can stop the process when
-the corridor is reached, which is done in *fastpos* but not in
-*corEvol*. Second, the main function of *fastpos* was written in C++
+![n\_\\mathrm{max}](https://latex.codecogs.com/png.latex?n_%5Cmathrm%7Bmax%7D
+"n_\\mathrm{max}") of 1000 and
+![n\_\\mathrm{min}](https://latex.codecogs.com/png.latex?n_%5Cmathrm%7Bmin%7D
+"n_\\mathrm{min}") of 20, we can expect a speedup of about 250. This is
+only an approximation for several reasons. First, one can stop the
+process when the corridor is reached, which is done in *fastpos* but not
+in *corEvol*. Second, the main function of *fastpos* was written in C++
 (via *Rcpp*), which is much faster than R. In a direct comparison
 between *fastpos* and *corEvol* we can expect *fastpos* to be at least
 250 times faster.
@@ -227,14 +290,12 @@ bash):
 
 ``` bash
 git -C corEvol pull || git clone --single-branch --branch benchmark https://github.com/johannes-titz/corEvol
-#> Already up to date.
 ```
 
 For *corEvol*, two files are “sourced” for the benchmark. The first file
 generates the simulations and the second is for calculating the critical
 point of stability. I turned off all messages produced by these source
-files, except for the report of the critical point of stability—to show
-that it produces the same result as *fastpos*.
+files.
 
 ``` r
 library(microbenchmark)
@@ -248,44 +309,14 @@ bm <- microbenchmark(corevol = corevol(),
                                                  sample_size_max = 1000,
                                                  n_studies = 10000),
                      times = 10, unit = "s")
-#> [1] "Analyzing rho = 0.1"
-#>   rho 0.8_0.1 0.9_0.1 0.95_0.1
-#> 1 0.1     249     355      471
-#> [1] "Analyzing rho = 0.1"
-#>   rho 0.8_0.1 0.9_0.1 0.95_0.1
-#> 1 0.1     250     364      469
-#> [1] "Analyzing rho = 0.1"
-#>   rho 0.8_0.1 0.9_0.1 0.95_0.1
-#> 1 0.1     249     359      471
-#> [1] "Analyzing rho = 0.1"
-#>   rho 0.8_0.1 0.9_0.1 0.95_0.1
-#> 1 0.1     249     357      463
-#> [1] "Analyzing rho = 0.1"
-#>   rho 0.8_0.1 0.9_0.1 0.95_0.1
-#> 1 0.1     250     364      469
-#> [1] "Analyzing rho = 0.1"
-#>   rho 0.8_0.1 0.9_0.1 0.95_0.1
-#> 1 0.1     250     364      469
-#> [1] "Analyzing rho = 0.1"
-#>   rho 0.8_0.1 0.9_0.1 0.95_0.1
-#> 1 0.1     253     363      475
-#> [1] "Analyzing rho = 0.1"
-#>   rho 0.8_0.1 0.9_0.1 0.95_0.1
-#> 1 0.1     249     359      471
-#> [1] "Analyzing rho = 0.1"
-#>   rho 0.8_0.1 0.9_0.1 0.95_0.1
-#> 1 0.1     249     359      471
-#> [1] "Analyzing rho = 0.1"
-#>   rho 0.8_0.1 0.9_0.1 0.95_0.1
-#> 1 0.1     250     364      469
 bm
 #> Unit: seconds
-#>     expr        min         lq      mean    median         uq        max neval
-#>  corevol 604.205445 609.666951 611.74153 611.75420 613.710455 616.786979    10
-#>  fastpos   1.388725   1.437223   1.53216   1.50323   1.599481   1.782225    10
+#>     expr        min         lq       mean     median         uq        max neval cld
+#>  corevol 547.848236 726.241786 796.730368 871.701845 887.676597 903.194998    10   b
+#>  fastpos   1.899546   4.159176   4.353587   4.268697   4.590466   6.157654    10  a
 ```
 
-For the chosen parameters, *fastpos* is about 400 times faster than
+For the chosen parameters, *fastpos* is about 200 times faster than
 *corEvol*, for which there are two main reasons: (1) *fastpos* is built
 around a C++ function via *Rcpp* and (2) this function does not
 calculate every calculation from scratch, but only calculates the
@@ -295,22 +326,13 @@ difference between the correlation at sample size
 formula of the Pearson correlation (see above). There are some other
 factors that might play a role, but they cannot account for the large
 difference found. For instance, setting up a population takes quite long
-in *corEvol* (about 20s), but compared to the \~9min required overall,
+in *corEvol* (about 20s), but compared to the \~13min required overall,
 this is only a small fraction. There are other parts of the *corEvol*
-code that are fated to be slow, but again, a speedup by a factor of 400
+code that are fated to be slow, but again, a speedup by a factor of 200
 cannot be achieved by improving these parts. The presented benchmark is
 definitely not comprehensive, but only demonstrates that *fastpos* can
 be used with no significant waiting time for a typical scenario, while
-for *corEvol* this is not the case. The theoretically expected speedup
-by a factor of 250 was clearly exceeded.
-
-One might think that *corEvol* can work with more than one core out of
-the box. But it is quite easy to also parallelize *fastpos*, for
-instance with *mclapply* from the *parallel* package. Furthermore, even
-a parallelized version of *corEvol* would need more than 400 cores to
-compete with *fastpos*. Overall, the speedup should be evident and will
-hopefully pave the way for a wider usage of the *stability* approach for
-sample size planning.
+for *corEvol* this is not the case.
 
 ## FAQ
 
@@ -360,14 +382,14 @@ the code style described here: <http://r-pkgs.had.co.nz/r.html#style>
 
 ## References
 
-<div id="refs" class="references">
+<div id="refs" class="references hanging-indent">
 
-<div id="ref-maxwell2008">
+<div id="ref-algina2003">
 
-Maxwell, S. E., Kelley, K., & Rausch, J. R. (2008). Sample size planning
-for statistical power and accuracy in parameter estimation. *Annual
-Review of Psychology*, *59*, 537–563.
-<https://doi.org/10.1146/annurev.psych.59.103006.093735>
+Algina, J., & Olejnik, S. (2003). Sample size tables for correlation
+analysis with applications in partial correlation and multiple
+regression analysis. *Multivariate Behavioral Research*, *38*, 309–323.
+<https://doi.org/10.1207/S15327906MBR3803_02>
 
 </div>
 
