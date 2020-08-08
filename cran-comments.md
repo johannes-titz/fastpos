@@ -4,7 +4,12 @@
 * win-builder (devel, release)
 
 ## R CMD check results
-There were no ERRORs, WARNINGs or NOTEs
+There were no ERRORs or WARNINGs
+
+There was one NOTE:
+
+* checking CRAN incoming feasibility ... NOTE
+Maintainer: 'Johannes Titz <johannes.titz@gmail.com>'
 
 ## Downstream dependencies
 There are no downstream dependencies
