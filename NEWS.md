@@ -1,4 +1,14 @@
-#
+# fastpos 0.4.0
+
+* multiple cores are now supported via the future package, use parameter 
+`n_cores`, gains are only visible if `n_studies` is high (overhead)
+* tests for multiple cores were included
+* `replace` parameter was added to the externally visible functions, and tests
+for `replace = false`
+* minor improvements in layout/documentation
+* test added for old pop_create function
+* test coverage is now somewhat higher since the untestable proportion of code
+reduced
 
 # fastpos 0.3.0
 

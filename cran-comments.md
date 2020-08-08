@@ -1,6 +1,6 @@
 ## Test environments
-* local Arch GNU/Linux install, R 3.6.2
-* ubuntu 16.04 (on travis-ci), R 3.6.2
+* local Arch GNU/Linux install, R 4.0.2
+* ubuntu 16.04 (on travis-ci), R 4.0.0
 * win-builder (devel, release)
 
 ## R CMD check results
