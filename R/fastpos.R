@@ -67,7 +67,7 @@ create_pop_inexact <- function(rho, size){
 create_pop <- function(rho, size) {
   y <- stats::rnorm(size)
   x <- stats::rnorm(size)
-  y.perp <- stats::residuals(stats::lm(x ~ y))
+  y.perp <- stats::residuals(stats::lm.fit(cbind(1, y), x))
   x <- rho * stats::sd(y.perp) * y + y.perp * stats::sd(y) * sqrt(1 - rho^2)
   matrix(c(x, y), ncol = 2)
 }
