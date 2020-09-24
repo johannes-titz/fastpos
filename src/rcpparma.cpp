@@ -125,13 +125,14 @@ IntegerVector simulate_pos(NumericVector x_pop,
                            bool replace,
                            float lower_limit,
                            float upper_limit){
+  bool interactive = !isatty(fileno(stdin));
   IntegerVector ret(n_studies);
   int npop = x_pop.size();
   NumericVector index_pop(npop);
   for (int i = 0; i < npop; i++){
     index_pop[i] = i;
   }
-  Progress p(n_studies, true);
+  Progress p(n_studies, interactive);
   for (int k = 0; k < n_studies; k++){
     if (k % 5000 == 0){
       if (Progress::check_abort()){
