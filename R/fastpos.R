@@ -116,7 +116,7 @@ find_one_critical_pos <- function(rho, sample_size_min = 20,
       f[[ii]] <- future::future({
         simulate_pos(x, y, ceiling(n_studies/(n_cores)), sample_size_min,
                      sample_size_max, replace, lower_limit, upper_limit)
-      })
+      }, seed = TRUE)
     }
     res <- simulate_pos(x, y, ceiling(n_studies/n_cores), sample_size_min,
                         sample_size_max, replace, lower_limit, upper_limit)
