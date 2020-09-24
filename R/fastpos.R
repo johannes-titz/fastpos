@@ -111,7 +111,6 @@ find_one_critical_pos <- function(rho, sample_size_min = 20,
   # we will use 1 normal invocation and n_cores - 1 futures, this way we have
   # a progress bar
   if (n_cores > 1){
-    #future::plan(multisession)
     f <- list()
     for (ii in seq(n_cores - 1)) {
       f[[ii]] <- future::future({
