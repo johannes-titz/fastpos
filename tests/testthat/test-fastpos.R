@@ -16,7 +16,7 @@ test_that("Schoenbrodt and Perugini's values are close to fastpos' values for
           rho = .1 and .7", {
   # average relative deviation within 4%
   expect_true(abs(mean(unlist(diff_rel))) < 0.04,
-              info = print(round(abs(mean(unlist(diff_rel)))), 2))
+              info = print(round(abs(mean(unlist(diff_rel))), 2)))
   # individual relative deviation within 10%
   expect_true(all(abs(diff_rel) < .10),
               info = print(diff_rel))
