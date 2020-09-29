@@ -1,4 +1,9 @@
-#
+# fastpos 0.4.1
+
+* tests now show more information if they fail, also the tolerance for an
+individual deviation is higher to avoid false alarms
+* progress bars are only shown if R is run interactively (this is required as
+per the manual for writing R extensions)
 
 # fastpos 0.4.0
 
