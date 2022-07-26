@@ -45,17 +45,17 @@ If you want to dig deeper, you can have a look at the functions that **find_crit
 
 ```{r fig.height=4.8, fig.width=6.4}
 pop <- create_pop(0.5, 1000000)
-pos <- simulate_pos(x_pop = pop[,1],
-                    y_pop = pop[,2],
+pos <- simulate_pos(x_pop = pop[, 1],
+                    y_pop = pop[, 2],
                     n_studies = 10000,
                     sample_size_min = 20,
                     sample_size_max = 1000,
-                    replace = T,
+                    replace = TRUE,
                     lower_limit = 0.4,
                     upper_limit = 0.6)
 hist(pos, xlim = c(0, 1000), xlab = c("Point of stability"),
      main = "Histogram of points of stability for rho = .5+-.1")
-quantile(pos, c(.8, .9, .95), na.rm = T)
+quantile(pos, c(.8, .9, .95), na.rm = TRUE)
 ```
 
 Note that no warning message appears if the corridor is not reached, but instead an NA value is returned. Pay careful attention if you work with this function, and adjust the maximum sample size as needed.
@@ -73,17 +73,25 @@ My final solution was quite simple and pragmatic: to use *futures*. I divide the
 Speed benefits are non-existent for a small numbers of studies, since *fastpos* is already too fast:
 
 ```{r parallel1, message=FALSE, warning=FALSE}
-onecore <- function() {find_critical_pos(0.5)}
-multicore <- function() {find_critical_pos(0.5, n_cores = future::availableCores())}
+onecore <- function() {
+  find_critical_pos(0.5)
+}
+multicore <- function() {
+  find_critical_pos(0.5, n_cores = future::availableCores())
+}
 microbenchmark::microbenchmark(onecore(), multicore(), times = 10)
 ```
 
 When increasing the number of studies, the benefit becomes visible, but the difference is not gigantic:
 
 ```{r parallel2, message=FALSE, warning=FALSE}
-onecore <- function() {find_critical_pos(0.5, n_studies = 1e5)}
-multicore <- function() {find_critical_pos(0.5, n_studies = 1e5,
-                                           n_cores = future::availableCores())}
+onecore <- function() {
+  find_critical_pos(0.5, n_studies = 1e5)
+}
+multicore <- function() {
+  find_critical_pos(0.5, n_studies = 1e5,
+                    n_cores = future::availableCores())
+  }
 microbenchmark::microbenchmark(onecore(), multicore(),
                                times = 10)
 ```
@@ -111,15 +119,16 @@ The ratio between the two approaches is:
 
 $$\frac{n_\mathrm{max}(n_\mathrm{max}+1)/2 -(n_\mathrm{min}-1)n_\mathrm{min}/2}{2n_\mathrm{max}-n_\mathrm{min}} $$
 ```{r eval=FALSE, include=FALSE}
-speedup <- function(n_max, n_min){
-  (n_max*(n_max+1)/2-n_min*(n_min-1)/2)/(2*n_max-n_min)
+speedup <- function(n_max, n_min) {
+  (n_max * (n_max + 1) / 2 - n_min * (n_min - 1) / 2) / (2 * n_max - n_min)
 }
 speedup(1000, 20)
-speedup2 <- function(n_max, n_min, cpos){
-  (n_max*(n_max+1)/2-n_min*(n_min-1)/2)/(2*n_max-cpos)
+speedup2 <- function(n_max, n_min, cpos) {
+  (n_max * (n_max + 1) / 2 - n_min * (n_min - 1) / 2) / (2 * n_max - cpos)
 }
 speedup2(1000, 20, 119)
-# get the 50% quantile to estimate how long on average it takes for fastpos to stop.
+# get the 50% quantile to estimate how long on average it takes for fastpos to
+# stop.
 ```
 
 For the typically used $n_\mathrm{max}$ of 1000 and $n_\mathrm{min}$ of 20, we can expect a speedup of about 250. This is only an approximation for several reasons. First, one can stop the process when the corridor is reached, which is done in *fastpos* but not in *corEvol*. Second, the main function of *fastpos* was written in C++ (via *Rcpp*), which is much faster than R. In a direct comparison between *fastpos* and *corEvol* we can expect *fastpos* to be at least 250 times faster. For a quick empirical benchmark see the README-file of the package on github: https://github.com/johannes-titz/fastpos
