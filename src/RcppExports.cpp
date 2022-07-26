@@ -6,6 +6,11 @@
 
 using namespace Rcpp;
 
+#ifdef RCPP_USE_GLOBAL_ROSTREAM
+Rcpp::Rostream<true>&  Rcpp::Rcout = Rcpp::Rcpp_cout_get();
+Rcpp::Rostream<false>& Rcpp::Rcerr = Rcpp::Rcpp_cerr_get();
+#endif
+
 // simulate_one_pos
 int simulate_one_pos(NumericVector x_pop, NumericVector y_pop, NumericVector index_pop, int sample_size_min, int sample_size_max, bool replace, float lower_limit, float upper_limit);
 RcppExport SEXP _fastpos_simulate_one_pos(SEXP x_popSEXP, SEXP y_popSEXP, SEXP index_popSEXP, SEXP sample_size_minSEXP, SEXP sample_size_maxSEXP, SEXP replaceSEXP, SEXP lower_limitSEXP, SEXP upper_limitSEXP) {

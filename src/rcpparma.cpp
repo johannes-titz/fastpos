@@ -110,7 +110,13 @@ int simulate_one_pos(NumericVector x_pop,
 //' Simulate several points of stability
 //'
 //' Runs several simulations and returns the points of stability, which can then
-//' be further processed to calculate the critical point of stability.
+//' be further processed to calculate the critical point of stability. This
+//' function should only be used if you need the specific points of stability.
+//' For instance, if you want to study the method in more detail and the higher
+//' level functions are not sufficient.
+//'
+//' If you just want to calculate a quantile of the distribution, use the main
+//' function of the package [fastpos::find_critical_pos()]).
 //'
 //' @param x_pop First vector of population.
 //' @param y_pop Second vector of population.
@@ -123,8 +129,14 @@ int simulate_one_pos(NumericVector x_pop,
 //'   stability.
 //' @return Vector of sample sizes at which corridor of stability was reached.
 //' @examples
-//' pop <- fastpos::create_pop(0.5, 1000000)
-//' simulate_pos(pop[,1], pop[,2], 100, 20, 1000, TRUE, 0.4, 0.6)
+//' # set up a population
+//' pop <- fastpos::create_pop(rho = 0.5, size = 1e6)
+//' # create a distribution of points of stability
+//' pos <- simulate_pos(x_pop = pop[,1], y_pop = pop[,2], n_studies = 100,
+//'                     sample_size_min = 20, sample_size_max = 1e3,
+//'                     replace = TRUE, lower_limit = 0.4, upper_limit = 0.6)
+//' # calculate quantiles or any other parameter of the distribution
+//' quantile(pos, c(.8, .9, .95), na.rm = TRUE)
 //' @export
 // [[Rcpp::export]]
 IntegerVector simulate_pos(NumericVector x_pop,
