@@ -75,6 +75,8 @@ create_pop <- function(rho, size) {
 #' Run simulation for one specific correlation.
 #'
 #' @param rho Population correlation.
+#' @param lower_limit Lower limit of corridor, overrides precision parameter
+#' @param upper_limit Upper limit of corridor, overrides precision parameter
 #' @inheritParams find_critical_pos
 #' @return A list with two elements, (1) a data frame called "summary"
 #'   containing all the above information as well as the critical sample sizes
@@ -90,15 +92,17 @@ find_one_critical_pos <- function(rho, sample_size_min = 20,
                                   pop_size = 1e6, precision = .1,
                                   precision_rel = T,
                                   confidence_levels = c(.8, .9, .95),
-                                  n_cores = 1) {
+                                  n_cores = 1,
+                                  lower_limit = NULL,
+                                  upper_limit = NULL) {
   # create corridor of stability
   if (precision_rel) {
     limits <- rho * (1 + c(-1, 1) * precision)
   } else {
     limits <- rho + c(-1, 1) * precision
   }
-  lower_limit <- limits[1]
-  upper_limit <- limits[2]
+  lower_limit <- ifelse(is.null(lower_limit), limits[1], lower_limit)
+  upper_limit <- ifelse(is.null(upper_limit), limits[2], upper_limit)
   # create bivariate population distribution
   pop <- create_pop(rho, pop_size)
 
@@ -174,6 +178,8 @@ find_one_critical_pos <- function(rho, sample_size_min = 20,
 #'   sample sizes (defaults to c(.8, .9, .95)).
 #' @param pop_size Population size (defaults to 1e6).
 #' @param n_cores Number of cores to use for simulation.
+#' @param lower_limits Lower limits of corridors, overrides precision parameter
+#' @param upper_limits Upper limits of corridors, overrides precision parameter
 #' @return A data frame containing all the above information, as well as the
 #'   points of stability.
 #' @examples
@@ -186,16 +192,21 @@ find_critical_pos <- function(rhos, precision = 0.1, precision_rel = FALSE,
                               n_studies = 10000,
                               confidence_levels = c(.8, .9, .95),
                               pop_size = 1e6,
-                              n_cores = 1) {
+                              n_cores = 1,
+                              lower_limits = NULL,
+                              upper_limits = NULL) {
   defaultplan <- options("future.plan")[[1]]
   options("future.plan" = "multisession")
-  result <- mapply(find_one_critical_pos, rhos,
+  result <- mapply(find_one_critical_pos,
+                   rho = rhos,
                    sample_size_max = sample_size_max,
                    sample_size_min = sample_size_min,
                    n_studies = n_studies,
                    precision = precision,
                    precision_rel = precision_rel,
                    n_cores = n_cores,
+                   lower_limit = lower_limits,
+                   upper_limit = upper_limits,
                    MoreArgs = list(confidence_levels = confidence_levels),
                    SIMPLIFY = F)
   summary <- lapply(result, function(x) x[[1]])

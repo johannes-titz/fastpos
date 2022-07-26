@@ -14,7 +14,9 @@ find_critical_pos(
   n_studies = 10000,
   confidence_levels = c(0.8, 0.9, 0.95),
   pop_size = 1e+06,
-  n_cores = 1
+  n_cores = 1,
+  lower_limits = NULL,
+  upper_limits = NULL
 )
 }
 \arguments{
@@ -43,6 +45,10 @@ sample sizes (defaults to c(.8, .9, .95)).}
 \item{pop_size}{Population size (defaults to 1e6).}
 
 \item{n_cores}{Number of cores to use for simulation.}
+
+\item{lower_limits}{Lower limits of corridors, overrides precision parameter}
+
+\item{upper_limits}{Upper limits of corridors, overrides precision parameter}
 }
 \value{
 A data frame containing all the above information, as well as the

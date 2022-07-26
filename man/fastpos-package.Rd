@@ -6,9 +6,7 @@
 \alias{fastpos-package}
 \title{fastpos: Finds the Critical Sequential Point of Stability for a Pearson Correlation}
 \description{
-Finds the critical sample size ("critical point of stability") for a 
-    correlation to stabilize in Schoenbrodt and Perugini's definition of 
-    sequential stability (see <doi:10.1016/j.jrp.2013.05.009>).
+Finds the critical sample size ("critical point of stability") for a correlation to stabilize in Schoenbrodt and Perugini's definition of sequential stability (see \doi{10.1016/j.jrp.2013.05.009}).
 }
 \details{
 In most cases you will just need the function \code{\link{find_critical_pos}}
@@ -36,7 +34,7 @@ Useful links:
 
 }
 \author{
-\strong{Maintainer}: Johannes Titz \email{johannes.titz@gmail.com} [copyright holder]
+\strong{Maintainer}: Johannes Titz \email{johannes.titz@gmail.com}
 
 }
 \keyword{internal}

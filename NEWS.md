@@ -1,4 +1,6 @@
-#
+# 0.5.0
+
+* set corridor manually via lower_limit and upper_limit, which will override precision parameters
 
 # fastpos 0.4.1
 

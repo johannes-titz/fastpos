@@ -61,6 +61,19 @@ test_that("unloading package works",
 test_that("relative precision works",
           expect_equal(c(sim$lower_limit, sim$upper_limit), c(.45, .55)))
 
+simB <- find_critical_pos(rhos = c(0.1, 0.2, 0.3),
+                          lower_limits = c(0.05, 0.18, 0.2),
+                          upper_limits = c(0.13, 0.25, 0.4))
+simBsingle <- find_one_critical_pos(rho = 0.5, lower_limit = 0.37,
+                                    upper_limit = 0.63)
+
+test_that("lower limit and upper limit works",
+          expect_equal(c(simBsingle$lower_limit, simBsingle$upper_limit),
+                       c(0.37, .63)))
+
+test_that("lower limits and upper limits works",
+          expect_equal(c(simB$lower_limit, simB$upper_limit),
+                       c(.05, 0.18, 0.2, 0.13, 0.25, 0.4)))
 
 test_that("create_pop_inexact (not used atm) works",
           expect_equal(round(cor(create_pop_inexact(0.5, 1e6))[1,2], 2), 0.50))
