@@ -49,3 +49,6 @@ paper_fastpos.odt$
 ^src/test\.cpp$
 ^cache$
 ^figure$
+^_pkgdown\.yml$
+^docs$
+^pkgdown$
