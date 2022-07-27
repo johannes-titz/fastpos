@@ -96,6 +96,6 @@ priori specified interval and stay in this interval if the sample size is
 increased further.
 }
 \examples{
-find_critical_pos(rho = 0.5)
+find_critical_pos(rho = 0.5, n_studies = 1e3)
 find_critical_pos(rho = c(0.4, 0.5), n_studies = 1e3)
 }
