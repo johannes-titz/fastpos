@@ -210,7 +210,7 @@ find_one_critical_pos <- function(rho, sample_size_min = 20,
 #' confidence levels.
 #'
 #' @examples
-#' find_critical_pos(rho = 0.5)
+#' find_critical_pos(rho = 0.5, n_studies = 1e3)
 #' find_critical_pos(rho = c(0.4, 0.5), n_studies = 1e3)
 #' @export
 #' @importFrom lifecycle deprecated is_present deprecate_warn badge
