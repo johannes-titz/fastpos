@@ -46,3 +46,6 @@ paper_fastpos.odt$
 ^titz\.R$
 ^1errorFile\.Rout$
 ^1out\.Rout$
+^src/test\.cpp$
+^cache$
+^figure$
