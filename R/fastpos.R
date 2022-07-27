@@ -269,7 +269,7 @@ find_critical_pos <- function(rho,
   summary <- plyr::ldply(summary)
   sum_n_not_breached <- sum(summary$n_not_breached)
   if (sum_n_not_breached > 0) {
-    warning(sum_n_not_breached, " simulation[s] did not reach the corridor of
+    warning("\n", sum_n_not_breached, " simulation[s] did not reach the corridor of
             stability", ".\nIncrease sample_size_max and rerun the simulation.",
             sep = "")
   }
