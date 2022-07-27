@@ -71,7 +71,7 @@ create_pop <- function(rho, size) {
 #' find_one_critical_pos(rho = 0.5)
 #' @noRd
 #' @importFrom stats cor quantile
-#' @importFrom future future value
+#' @importFrom pbapply pblapply
 #' @importFrom tibble lst
 find_one_critical_pos <- function(rho, sample_size_min = 20,
                                   sample_size_max = 1000,
@@ -108,20 +108,13 @@ find_one_critical_pos <- function(rho, sample_size_min = 20,
 
   # create dist of pos
 
-  # we will use 1 normal invocation and n_cores - 1 futures, this way we have
-  # a progress bar
   if (n_cores > 1) {
-    f <- list()
-    for (ii in seq(n_cores - 1)) {
-      f[[ii]] <- future::future({
-        simulate_pos(x, y, ceiling(n_studies / (n_cores)), sample_size_min,
-                     sample_size_max, replace, lower_limit, upper_limit, FALSE)
-      }, seed = TRUE)
-    }
-    res <- simulate_pos(x, y, ceiling(n_studies / n_cores), sample_size_min,
-                        sample_size_max, replace, lower_limit, upper_limit, progress)
-    v <- unlist(lapply(f, FUN = future::value))
-    res <- c(res, v)
+    res <- unlist(pbapply::pblapply(1:ceiling(n_studies / 1000), function(k)
+      simulate_pos(x, y, 1e3, sample_size_min,
+                   sample_size_max, replace,
+                   lower_limit, upper_limit, progress = FALSE),
+      cl = n_cores
+    ))
   } else {
     res <- simulate_pos(x, y, n_studies, sample_size_min, sample_size_max, replace,
                         lower_limit, upper_limit, progress)
@@ -233,7 +226,7 @@ find_critical_pos <- function(rho,
                               rhos = lifecycle::deprecated()) {
   if (lifecycle::is_present(precision)) {
     lifecycle::deprecate_warn(
-      when = "1.0.0",
+      when = "0.6.0",
       what = "find_critical_pos(precision)",
       details = "find_critical_pos(precision_absolute)"
     )
@@ -242,7 +235,7 @@ find_critical_pos <- function(rho,
 
   if (lifecycle::is_present(rhos)) {
     lifecycle::deprecate_warn(
-      when = "1.0.0",
+      when = "0.6.0",
       what = "find_critical_pos(rhos)",
       details = "find_critical_pos(rho)"
     )
@@ -251,15 +244,13 @@ find_critical_pos <- function(rho,
 
   if (lifecycle::is_present(precision_rel)) {
     lifecycle::deprecate_warn(
-      when = "1.0.0",
+      when = "0.6.0",
       what = "find_critical_pos(precision_rel)",
       details = "Use precision_relative instead. Note that precision_relative takes a numeric value, not a logical!"
     )
     precision_relative <- precision_absolute
   }
 
-  defaultplan <- options("future.plan")[[1]]
-  options("future.plan" = "multisession")
   result <- mapply(find_one_critical_pos,
                    rho = rho,
                    sample_size_max = sample_size_max,
@@ -282,7 +273,6 @@ find_critical_pos <- function(rho,
             stability", ".\nIncrease sample_size_max and rerun the simulation.",
             sep = "")
   }
-  options("future.plan" = defaultplan)
   summary
 }
 

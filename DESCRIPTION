@@ -13,10 +13,10 @@ Imports:
     Rcpp,
     plyr,
     MASS,
-    future,
     lifecycle,
     tibble,
-    stats
+    stats,
+    pbapply
 LinkingTo: Rcpp, RcppArmadillo, RcppProgress
 URL: https://github.com/johannes-titz/fastpos
 BugReports: https://github.com/johannes-titz/fastpos/issues
