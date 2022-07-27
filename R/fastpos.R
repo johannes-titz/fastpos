@@ -82,7 +82,8 @@ find_one_critical_pos <- function(rho, sample_size_min = 20,
                                   confidence_levels = c(.8, .9, .95),
                                   n_cores = 1,
                                   lower_limit = NA,
-                                  upper_limit = NA) {
+                                  upper_limit = NA,
+                                  progress = show_progress()) {
 
   # create corridor of stability
   corridor_function <- choose_corridor_function(
@@ -114,16 +115,16 @@ find_one_critical_pos <- function(rho, sample_size_min = 20,
     for (ii in seq(n_cores - 1)) {
       f[[ii]] <- future::future({
         simulate_pos(x, y, ceiling(n_studies / (n_cores)), sample_size_min,
-                     sample_size_max, replace, lower_limit, upper_limit)
+                     sample_size_max, replace, lower_limit, upper_limit, FALSE)
       }, seed = TRUE)
     }
     res <- simulate_pos(x, y, ceiling(n_studies / n_cores), sample_size_min,
-                        sample_size_max, replace, lower_limit, upper_limit)
+                        sample_size_max, replace, lower_limit, upper_limit, progress)
     v <- unlist(lapply(f, FUN = future::value))
     res <- c(res, v)
   } else {
-    res <- simulate_pos(x, y, n_studies, sample_size_min, sample_size_max, TRUE,
-                        lower_limit, upper_limit)
+    res <- simulate_pos(x, y, n_studies, sample_size_min, sample_size_max, replace,
+                        lower_limit, upper_limit, progress)
   }
 
   # on interruption, C++ will return -1 (if R interrupts by itself, nothing
@@ -161,47 +162,60 @@ find_one_critical_pos <- function(rho, sample_size_min = 20,
 #' priori specified interval and stay in this interval if the sample size is
 #' increased further.
 #'
-#' @param rhos Vector of population correlations (can also be a single
-#'   correlation).
-#' @param precision_absolute Precision around the correlation which is
-#'   acceptable (defaults to 0.1). The precision will determine the corridor of
-#'   stability which is just rho+-precision.
-#' @param confidence_levels Confidence levels for point of stability. This
-#'   corresponds to the quantile of the distribution of all found critical
-#'   sample sizes (defaults to c(.8, .9, .95)). A single value can also be used.
-#' @param n_studies Number of studies to run for each rho (defaults to 10e3).
-#' @param sample_size_min Minimum sample size for each study (defaults to 20).
-#' @param sample_size_max Maximum sample size for each study (defaults to 1e3).
-#'   If you get a warning that the corridor of stability was not reached, you
-#'   should increase this value. But note that this will increase the time for
-#'   the simulation.
-#' @param replace Whether drawing samples is with replacement or not. Default is
-#'   TRUE, which usually should not be changed. This parameter is mainly of
-#'   interest for researchers studying the method in more detail.
+#' @param rho Vector of population correlations (can also be a single correlation).
+#' @param precision_absolute Precision around the correlation which is acceptable
+#'   (defaults to 0.1). The precision will determine the corridor of stability which is
+#'   just rho+-precision. Can be a single value or a vector (different values for
+#'   different rhos).
+#' @param confidence_levels Confidence levels for point of stability. This corresponds
+#'   to the quantile of the distribution of all found critical sample sizes (defaults
+#'   to c(.8, .9, .95)). A single value can also be used. Note that this value is fixed
+#'   for all rhos! You cannot specify different levels for different rhos.
+#' @param n_studies Number of studies to run for each rho (defaults to 10e3). A vector
+#'   can be used (different values for different rhos).
+#' @param sample_size_min Minimum sample size for each study (defaults to 20). A vector
+#'   can be used (different values for different rhos).
+#' @param sample_size_max Maximum sample size for each study (defaults to 1e3). A
+#'   vector can be used (different values for different rhos). If you get a warning
+#'   that the corridor of stability was not reached, you should increase this value.
+#'   But note that this will increase the time for the simulation.
+#' @param replace Whether drawing samples is with replacement or not. Default is TRUE,
+#'   which usually should not be changed. This parameter is mainly of interest for
+#'   researchers studying the method in more detail. A vector can be used (different
+#'   values for different rhos).
 #' @param pop_size Population size (defaults to 1e6). This is the size of the
-#'   population from which value pairs for correlations are drawn. This value
-#'   should usually not be decreased as it can lead to less accurate results.
-#' @param n_cores Number of cores to use for simulation.
+#'   population from which value pairs for correlations are drawn. This value should
+#'   usually not be decreased as it can lead to less accurate results.
+#' @param n_cores Number of cores to use for simulation. Defaults to 1.
 #' @param precision_relative Relative precision around the correlation
-#'   (rho+-rho*precision), if set, it will overwrite precision_absolute
-#' @param lower_limits Lower limits of corridors, overrides precision parameters
-#' @param upper_limits Upper limits of corridors, overrides precision parameters
+#'   (rho+-rho*precision), if set, it will overwrite precision_absolute. A vector can
+#'   be used (different values for different rhos).
+#' @param lower_limit Lower limit of corridor, overrides precision parameters. A vector
+#'   can be used (different values for different rhos). If used, upper_limit must also
+#'   be set.
+#' @param upper_limit Upper limit of corridor, overrides precision parameters. A vector
+#'   can be used (different values for different rhos). If used, lower_limit must also
+#'   be set.
+#' @param progress Should progress bar be displayed? Logical, default is to show
+#'   progress when run in interactive mode.
 #' @param precision `r lifecycle::badge("deprecated")`, use precision_absolute instead
-#' @param precision_rel `r lifecycle::badge("deprecated")`, use precision_relative instead
-#' @return A data frame containing all the above information, as well as
-#'   the critical points of stability.
+#' @param precision_rel `r lifecycle::badge("deprecated")`, use precision_relative
+#'   instead
+#' @param rhos `r lifecycle::badge("deprecated")`, use rho instead
+#' @return A data frame containing all the above information, as well as the critical
+#'   points of stability.
 #'
 #' The points of stability follow directly after the first column (rho) and are
 #' named pos.confidence-level, e.g. pos.80, pos.90, pos.95 for the default
 #' confidence levels.
 #'
 #' @examples
-#' find_critical_pos(rhos = 0.5)
-#' find_critical_pos(rhos = c(0.4, 0.5), n_studies = 1e3)
+#' find_critical_pos(rho = 0.5)
+#' find_critical_pos(rho = c(0.4, 0.5), n_studies = 1e3)
 #' @export
 #' @importFrom lifecycle deprecated is_present deprecate_warn badge
 #' @importFrom plyr ldply
-find_critical_pos <- function(rhos,
+find_critical_pos <- function(rho,
                               precision_absolute = 0.1,
                               confidence_levels = c(.8, .9, .95),
                               sample_size_min = 20,
@@ -211,10 +225,12 @@ find_critical_pos <- function(rhos,
                               pop_size = 1e6,
                               n_cores = 1,
                               precision_relative = NA,
-                              lower_limits = NA,
-                              upper_limits = NA,
+                              lower_limit = NA,
+                              upper_limit = NA,
+                              progress = show_progress(),
                               precision = lifecycle::deprecated(),
-                              precision_rel = lifecycle::deprecated()) {
+                              precision_rel = lifecycle::deprecated(),
+                              rhos = lifecycle::deprecated()) {
   if (lifecycle::is_present(precision)) {
     lifecycle::deprecate_warn(
       when = "1.0.0",
@@ -222,6 +238,15 @@ find_critical_pos <- function(rhos,
       details = "find_critical_pos(precision_absolute)"
     )
     precision_absolute <- precision
+  }
+
+  if (lifecycle::is_present(rhos)) {
+    lifecycle::deprecate_warn(
+      when = "1.0.0",
+      what = "find_critical_pos(rhos)",
+      details = "find_critical_pos(rho)"
+    )
+    rho <- rhos
   }
 
   if (lifecycle::is_present(precision_rel)) {
@@ -236,16 +261,18 @@ find_critical_pos <- function(rhos,
   defaultplan <- options("future.plan")[[1]]
   options("future.plan" = "multisession")
   result <- mapply(find_one_critical_pos,
-                   rho = rhos,
+                   rho = rho,
                    sample_size_max = sample_size_max,
                    sample_size_min = sample_size_min,
                    n_studies = n_studies,
-                   n_cores = n_cores,
                    precision_absolute = precision_absolute,
                    precision_relative = precision_relative,
-                   lower_limit = lower_limits,
-                   upper_limit = upper_limits,
-                   MoreArgs = list(confidence_levels = confidence_levels),
+                   lower_limit = lower_limit,
+                   upper_limit = upper_limit,
+                   MoreArgs = list(confidence_levels = confidence_levels,
+                                   n_cores = n_cores,
+                                   pop_size = pop_size,
+                                   progress = progress),
                    SIMPLIFY = FALSE)
   summary <- lapply(result, function(x) x[[1]])
   summary <- plyr::ldply(summary)
@@ -321,4 +348,11 @@ choose_corridor_function <- function(precision_absolute,
 
 rep_f <- function(n, f) {
   lapply(1:n, function(x) f)
+}
+
+show_progress <- function() {
+  # it is also possible to use isatty(stdout) and Sys.getenv("RSTUDIO"), which is 1
+  # when RSTUDIO is used
+  progress <- interactive()
+  return(progress)
 }

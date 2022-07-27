@@ -12,7 +12,8 @@ simulate_pos(
   sample_size_max,
   replace,
   lower_limit,
-  upper_limit
+  upper_limit,
+  progress
 )
 }
 \arguments{
@@ -32,6 +33,8 @@ stability.}
 \item{lower_limit}{Lower limit of corridor of stability.}
 
 \item{upper_limit}{Upper limit of corridor of stability.}
+
+\item{progress}{Should progress bar be displayed? Boolean, default is FALSE.}
 }
 \value{
 Vector of sample sizes at which corridor of stability was reached.
@@ -53,7 +56,8 @@ pop <- fastpos::create_pop(rho = 0.5, size = 1e6)
 # create a distribution of points of stability
 pos <- simulate_pos(x_pop = pop[,1], y_pop = pop[,2], n_studies = 100,
                     sample_size_min = 20, sample_size_max = 1e3,
-                    replace = TRUE, lower_limit = 0.4, upper_limit = 0.6)
+                    replace = TRUE, lower_limit = 0.4, upper_limit = 0.6,
+                    progress = TRUE)
 # calculate quantiles or any other parameter of the distribution
 quantile(pos, c(.8, .9, .95), na.rm = TRUE)
 }

@@ -20,9 +20,9 @@ test_that("lower limit and upper limit works", {
 test_that("lower limits and upper limits works", {
           sim_b <- suppressWarnings(
             find_critical_pos(
-              rhos = c(0.1, 0.2, 0.3),
-              lower_limits = c(0.05, 0.18, 0.2),
-              upper_limits = c(0.13, 0.25, 0.4),
+              rho = c(0.1, 0.2, 0.3),
+              lower_limit = c(0.05, 0.18, 0.2),
+              upper_limit = c(0.13, 0.25, 0.4),
               n_studies = 1e2
             )
           )

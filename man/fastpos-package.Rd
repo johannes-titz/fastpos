@@ -34,7 +34,7 @@ Useful links:
 
 }
 \author{
-\strong{Maintainer}: Johannes Titz \email{johannes.titz@gmail.com}
+\strong{Maintainer}: Johannes Titz \email{johannes.titz@gmail.com} (\href{https://orcid.org/0000-0002-1102-5719}{ORCID})
 
 }
 \keyword{internal}

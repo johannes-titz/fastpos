@@ -127,6 +127,7 @@ int simulate_one_pos(NumericVector x_pop,
 //' @param n_studies How many studies to conduct.
 //' @param sample_size_min Minimum sample size to start in corridor of
 //'   stability.
+//' @param progress Should progress bar be displayed? Boolean, default is FALSE.
 //' @return Vector of sample sizes at which corridor of stability was reached.
 //' @examples
 //' # set up a population
@@ -134,7 +135,8 @@ int simulate_one_pos(NumericVector x_pop,
 //' # create a distribution of points of stability
 //' pos <- simulate_pos(x_pop = pop[,1], y_pop = pop[,2], n_studies = 100,
 //'                     sample_size_min = 20, sample_size_max = 1e3,
-//'                     replace = TRUE, lower_limit = 0.4, upper_limit = 0.6)
+//'                     replace = TRUE, lower_limit = 0.4, upper_limit = 0.6,
+//'                     progress = TRUE)
 //' # calculate quantiles or any other parameter of the distribution
 //' quantile(pos, c(.8, .9, .95), na.rm = TRUE)
 //' @export
@@ -146,15 +148,15 @@ IntegerVector simulate_pos(NumericVector x_pop,
                            int sample_size_max,
                            bool replace,
                            float lower_limit,
-                           float upper_limit){
-  bool interactive = ISATTY(FILENO(stdin));
+                           float upper_limit,
+                           bool progress){
   IntegerVector ret(n_studies);
   int npop = x_pop.size();
   NumericVector index_pop(npop);
   for (int i = 0; i < npop; i++){
     index_pop[i] = i;
   }
-  Progress p(n_studies, interactive);
+  Progress p(n_studies, progress);
   for (int k = 0; k < n_studies; k++){
     if (k % 5000 == 0){
       if (Progress::check_abort()){

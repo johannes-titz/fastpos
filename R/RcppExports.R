@@ -38,6 +38,7 @@ simulate_one_pos <- function(x_pop, y_pop, index_pop, sample_size_min, sample_si
 #' @param n_studies How many studies to conduct.
 #' @param sample_size_min Minimum sample size to start in corridor of
 #'   stability.
+#' @param progress Should progress bar be displayed? Boolean, default is FALSE.
 #' @return Vector of sample sizes at which corridor of stability was reached.
 #' @examples
 #' # set up a population
@@ -45,11 +46,12 @@ simulate_one_pos <- function(x_pop, y_pop, index_pop, sample_size_min, sample_si
 #' # create a distribution of points of stability
 #' pos <- simulate_pos(x_pop = pop[,1], y_pop = pop[,2], n_studies = 100,
 #'                     sample_size_min = 20, sample_size_max = 1e3,
-#'                     replace = TRUE, lower_limit = 0.4, upper_limit = 0.6)
+#'                     replace = TRUE, lower_limit = 0.4, upper_limit = 0.6,
+#'                     progress = TRUE)
 #' # calculate quantiles or any other parameter of the distribution
 #' quantile(pos, c(.8, .9, .95), na.rm = TRUE)
 #' @export
-simulate_pos <- function(x_pop, y_pop, n_studies, sample_size_min, sample_size_max, replace, lower_limit, upper_limit) {
-    .Call('_fastpos_simulate_pos', PACKAGE = 'fastpos', x_pop, y_pop, n_studies, sample_size_min, sample_size_max, replace, lower_limit, upper_limit)
+simulate_pos <- function(x_pop, y_pop, n_studies, sample_size_min, sample_size_max, replace, lower_limit, upper_limit, progress) {
+    .Call('_fastpos_simulate_pos', PACKAGE = 'fastpos', x_pop, y_pop, n_studies, sample_size_min, sample_size_max, replace, lower_limit, upper_limit, progress)
 }
 
