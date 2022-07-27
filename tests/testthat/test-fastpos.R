@@ -22,7 +22,7 @@ test_that("previous values can be reproduced", {
   cpos_mc <- suppressWarnings(
     find_critical_pos(rho = c(.1, .7), sample_size_max = 1e3,
                       n_studies = 40e3,
-                      n_cores = future::availableCores())
+                      n_cores = num_workers)
   )
 
   diff_rel_mc <- (nicebread - cpos_mc[, 2:4]) / nicebread
@@ -38,7 +38,7 @@ test_that("previous values can be reproduced", {
   cpos_mc_replace <- suppressWarnings(
     find_critical_pos(rho = c(.1, .7), sample_size_max = 1e3,
                       n_studies = 40e3,
-                      n_cores = future::availableCores(),
+                      n_cores = num_workers,
                       replace = FALSE)
   )
   # average relative deviation within 4%
