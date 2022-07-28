@@ -15,16 +15,17 @@ status](https://www.r-pkg.org/badges/version/fastpos)](https://CRAN.R-project.or
 The R package *fastpos* provides a fast algorithm to calculate the
 required sample size for a Pearson correlation to stabilize within a
 sequential framework (Schönbrodt & Perugini, 2013, 2018). Basically, one
-wants to find the sample size at which one can be sure that 1-α percent
-of many studies will fall into a specified corridor of stability around
-an assumed population correlation and stay inside that corridor if more
-participants are added to the study. For instance, find out *how many*
-participants per study are required so that, out of 100k studies, 90%
-would fall into the region between .4 to .6 (a Pearson correlation) and
-not leave this region again when more participants are added (under the
-assumption that the population correlation is .5). This sample size is
-also referred to as the *critical point of stability* for the specific
-parameters.
+wants to find the sample size at which one can be sure that
+![1-\\alpha](https://latex.codecogs.com/png.image?%5Cdpi%7B110%7D&space;%5Cbg_white&space;1-%5Calpha "1-\alpha")
+percent of many studies will fall into a specified corridor of stability
+around an assumed population correlation and stay inside that corridor
+if more participants are added to the study. For instance, find out *how
+many* participants per study are required so that, out of 100k studies,
+90% would fall into the region between .4 to .6 (a Pearson correlation)
+and not leave this region again when more participants are added (under
+the assumption that the population correlation is .5). This sample size
+is also referred to as the *critical point of stability* for the
+specific parameters.
 
 This approach is related to the AO-method of sample size planning (e.g.
 Algina & Olejnik, 2003) and as such can be seen as an alternative to
@@ -181,7 +182,7 @@ My intermediate solution was quite simple and pragmatic: to use
 then started
 ![n-1](https://latex.codecogs.com/png.image?%5Cdpi%7B110%7D&space;%5Cbg_white&space;n-1 "n-1")
 simulations via futures in a multisession plan. Meanwhile the main R
-process also started a simulation, wich showed a progress bar in C++.
+process also started a simulation, which showed a progress bar in C++.
 All simulations ended at approximately the same time, the progress bar
 finished and the futures resolved. The points of stability were combined
 and the rest of the program worked as for the singlethreaded version.
@@ -261,7 +262,7 @@ the corridor is reached, which is done in *fastpos* but not in
 algorithms involve many more steps than just calculating correlations.
 For instance, setting up the population with a specific
 ![\\rho](https://latex.codecogs.com/png.image?%5Cdpi%7B110%7D&space;%5Cbg_white&space;%5Crho "\rho")
-takes some time since it ususally consists of a million value pairs. The
+takes some time since it usually consists of a million value pairs. The
 interface functions to setup the simulations also play an important
 role. Obviously, there is a lower time limit that cannot be beat. Thus,
 it is necessary to study the speed benefit empirically.
