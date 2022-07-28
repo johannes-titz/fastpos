@@ -1,6 +1,6 @@
 # 0.5.0
 
-* improve multicore support, pbapply is now used to split up the calculation of points of stability; this is much faster than with futures but does not work on Window
+* improve multicore support, pbapply is now used to split up the calculation of points of stability; this is much faster than with futures but does not work on Windows
 * give the option to set the corridor manually via lower_limit and upper_limit, which will override precision parameters
 * change parameter precision to precision_absolute and precision_rel to precision_relative, if you used these parameters before, you need to change your code
 * parameter rhos is no rho
