@@ -30,7 +30,7 @@
     
     <a class="navbar-brand me-2" href="index.html">fastpos</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.4.1.9000</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.5.0</small>
 
     
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -68,6 +68,7 @@
 <div class="page-header"><h1 id="fastpos">fastpos<a class="anchor" aria-label="anchor" href="#fastpos"></a>
 </h1></div>
 <!-- badges: start -->
+
 <p>The R package <em>fastpos</em> provides a fast algorithm to calculate the required sample size for a Pearson correlation to stabilize within a sequential framework (Schönbrodt &amp; Perugini, 2013, 2018). Basically, one wants to find the sample size at which one can be sure that 1-α percent of many studies will fall into a specified corridor of stability around an assumed population correlation and stay inside that corridor if more participants are added to the study. For instance, find out <em>how many</em> participants per study are required so that, out of 100k studies, 90% would fall into the region between .4 to .6 (a Pearson correlation) and not leave this region again when more participants are added (under the assumption that the population correlation is .5). This sample size is also referred to as the <em>critical point of stability</em> for the specific parameters.</p>
 <p>This approach is related to the AO-method of sample size planning (e.g. Algina &amp; Olejnik, 2003) and as such can be seen as an alternative to power analysis. Unlike AO, the concept of <em>stability</em> incorporates the idea of sequentially adding participants to a study. Although the approach is young, it has already attracted a lot of interest in the psychological research community, which is evident in over 800 citations of the original publication (Schönbrodt &amp; Perugini, 2013). Still, to date, there exists no easy way to use the stability approach for individual sample size planning because there is no analytical solution to the problem and a simulation approach is computationally expensive with <img src="https://latex.codecogs.com/png.image?%5Cdpi%7B110%7D&amp;space;%5Cbg_white&amp;space;%5Cmathcal%7BO%7D%28n%5E2%29" title="\mathcal{O}(n^2)" alt="\mathcal{O}(n^2)">. The presented package overcomes this limitation by speeding up the calculation of correlations and achieving <img src="https://latex.codecogs.com/png.image?%5Cdpi%7B110%7D&amp;space;%5Cbg_white&amp;space;%5Cmathcal%7BO%7D%28n%29" title="\mathcal{O}(n)" alt="\mathcal{O}(n)">. For typical parameters, the theoretical speedup should be at least around a factor of 250. An empirical benchmark for a typical scenario even shows a speedup of about 400, paving the way for a wider usage of the <em>stability</em> approach.</p>
 <div class="section level2">
@@ -248,11 +249,14 @@
 <h2 id="references">References<a class="anchor" aria-label="anchor" href="#references"></a>
 </h2>
 <div id="refs" class="references csl-bib-body hanging-indent" line-spacing="2">
-<div id="ref-algina2003" class="csl-entry">Algina, J., &amp; Olejnik, S. (2003). Sample size tables for correlation analysis with applications in partial correlation and multiple regression analysis. <em>Multivariate Behavioral Research</em>, <em>38</em>, 309–323. <a href="https://doi.org/10.1207/S15327906MBR3803_02" class="external-link uri">https://doi.org/10.1207/S15327906MBR3803_02</a>
+<div id="ref-algina2003" class="csl-entry">
+Algina, J., &amp; Olejnik, S. (2003). Sample size tables for correlation analysis with applications in partial correlation and multiple regression analysis. <em>Multivariate Behavioral Research</em>, <em>38</em>, 309–323. <a href="https://doi.org/10.1207/S15327906MBR3803_02" class="external-link uri">https://doi.org/10.1207/S15327906MBR3803_02</a>
 </div>
-<div id="ref-schonbrodt2013" class="csl-entry">Schönbrodt, F. D., &amp; Perugini, M. (2013). At what sample size do correlations stabilize? <em>Journal of Research in Personality</em>, <em>47</em>, 609–612. <a href="https://doi.org/10.1016/j.jrp.2013.05.009" class="external-link uri">https://doi.org/10.1016/j.jrp.2013.05.009</a>
+<div id="ref-schonbrodt2013" class="csl-entry">
+Schönbrodt, F. D., &amp; Perugini, M. (2013). At what sample size do correlations stabilize? <em>Journal of Research in Personality</em>, <em>47</em>, 609–612. <a href="https://doi.org/10.1016/j.jrp.2013.05.009" class="external-link uri">https://doi.org/10.1016/j.jrp.2013.05.009</a>
 </div>
-<div id="ref-schonbrodt2018" class="csl-entry">Schönbrodt, F. D., &amp; Perugini, M. (2018). Corrigendum to “At What Sample Size Do Correlations Stabilize?” [J. Res. Pers. 47 (2013) 609–612]. <em>Journal of Research in Personality</em>, <em>74</em>, 194. <a href="https://doi.org/10.1016/j.jrp.2018.02.010" class="external-link uri">https://doi.org/10.1016/j.jrp.2018.02.010</a>
+<div id="ref-schonbrodt2018" class="csl-entry">
+Schönbrodt, F. D., &amp; Perugini, M. (2018). Corrigendum to “At What Sample Size Do Correlations Stabilize?” [J. Res. Pers. 47 (2013) 609–612]. <em>Journal of Research in Personality</em>, <em>74</em>, 194. <a href="https://doi.org/10.1016/j.jrp.2018.02.010" class="external-link uri">https://doi.org/10.1016/j.jrp.2018.02.010</a>
 </div>
 </div>
 </div>
@@ -285,16 +289,16 @@
 <div class="developers">
 <h2 data-toc-skip>Developers</h2>
 <ul class="list-unstyled">
-<li>Johannes Titz <br><small class="roles"> Author, maintainer </small> <a href="https://orcid.org/0000-0002-1102-5719" target="orcid.widget" aria-label="ORCID" class="external-link"><span class="fab fa-orcid orcid" aria-hidden="true"></span></a> </li>
+<li>Johannes Titz <br><small class="roles"> Author, maintainer, copyright holder </small> <a href="https://orcid.org/0000-0002-1102-5719" target="orcid.widget" aria-label="ORCID" class="external-link"><span class="fab fa-orcid orcid" aria-hidden="true"></span></a> </li>
 </ul>
 </div>
 
 <div class="dev-status">
 <h2 data-toc-skip>Dev status</h2>
 <ul class="list-unstyled">
-<li><a href="https://travis-ci.org/johannes-titz/fastpos" class="external-link"><img src="https://travis-ci.org/johannes-titz/fastpos.svg?branch=master" alt="Travis build status"></a></li>
 <li><a href="https://app.codecov.io/gh/johannes-titz/fastpos?branch=master" class="external-link"><img src="https://codecov.io/gh/johannes-titz/fastpos/branch/master/graph/badge.svg" alt="Codecov test coverage"></a></li>
 <li><a href="https://CRAN.R-project.org/package=fastpos" class="external-link"><img src="https://www.r-pkg.org/badges/version/fastpos" alt="CRAN status"></a></li>
+<li><a href="https://github.com/johannes-titz/fastpos/actions/workflows/R-CMD-check.yaml" class="external-link"><img src="https://github.com/johannes-titz/fastpos/actions/workflows/R-CMD-check.yaml/badge.svg" alt="R-CMD-check"></a></li>
 </ul>
 </div>
 
