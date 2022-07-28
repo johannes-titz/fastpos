@@ -113,11 +113,9 @@ In the introduction I boldly claimed that *fastpos* is much faster than the orig
 
 *corEvol* calculates every correlation from scratch. If we take the sum formula for the correlation coefficient
 
-$$
-r_{xy} = \frac{n\sum x_i y_i - \sum x_i \sum y_i}
+$$r_{xy} = \frac{n\sum x_i y_i - \sum x_i \sum y_i}
 {\sqrt{n\sum x_i^2-(\sum x_i)^2} 
- \sqrt{n\sum y_i^2-(\sum y_i)^2}}
-$$
+ \sqrt{n\sum y_i^2-(\sum y_i)^2}}$$
 
 we can see that several sums are calculated, each consisting of adding up $n$ (the sample size) terms. This has to be done for every sample size from the minimum to the maximum one. Thus, the total number of added terms for one sum is:
 
