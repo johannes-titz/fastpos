@@ -28,5 +28,4 @@ Suggests:
     testthat (>= 2.1.0),
     covr,
     microbenchmark
-VignetteBuilder: knitr
 Roxygen: list(markdown = TRUE)
