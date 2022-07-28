@@ -1,7 +1,5 @@
 ---
-output:
-  github_document:
-    pandoc_args: --webtex
+output: github_document
 bibliography: "library.bib"
 csl: apa.csl
 ---
@@ -13,6 +11,7 @@ knitr::opts_chunk$set(
   collapse = TRUE,
   comment = "#>",
   fig.path = "man/figures/README-",
+  out.width = "100%",
   cache = TRUE
 )
 ```
@@ -92,9 +91,9 @@ I thought the best solution is is to directly parallelize in C++. I tried to do 
 
 My intermediate solution was quite simple and pragmatic: to use *futures*. I divided the number of studies by the available cores $n$, then started $n-1$ simulations via futures in a multisession plan. Meanwhile the main R process also started a simulation, wich showed a progress bar in C++. All simulations ended at approximately the same time, the progress bar finished and the futures resolved. The points of stability were combined and the rest of the program worked as for the singlethreaded version.
 
-Unfortuantely this solution did not bring any substantial speed benefits. Since version 0.5.0 I switched to the parallel package and pbapply. This means there is no multicore support for Windows but the implementation is simple and shows substantial speed benefits.
+Unfortunately this solution did not bring any substantial speed benefits. Since version 0.5.0 I switched to the parallel package and pbapply. This means there is no multicore support for Windows but the implementation is simple and shows substantial speed benefits.
 
-For small studies these benefits are less pronounced but visible:
+Even for small simulations these benefits are clearly visible:
 
 ```{r parallel1, message=FALSE, warning=FALSE}
 onecore <- function() {
@@ -106,19 +105,6 @@ multicore <- function() {
 microbenchmark::microbenchmark(onecore(), multicore(), times = 10)
 ```
 
-When increasing the number of studies, the benefit becomes more visible and makes a clear difference:
-
-```{r parallel2, message=FALSE, warning=FALSE}
-onecore <- function() {
-  find_critical_pos(0.5, n_studies = 1e5)
-}
-multicore <- function() {
-  find_critical_pos(0.5, n_studies = 1e5, n_cores = n_cores)
-}
-microbenchmark::microbenchmark(onecore(), multicore(),
-                               times = 10)
-```
-
 The test was done on a server with 32 cores, but only 31 cores were used.
 
 ## How fast is *fastpos*?
@@ -127,9 +113,11 @@ In the introduction I boldly claimed that *fastpos* is much faster than the orig
 
 *corEvol* calculates every correlation from scratch. If we take the sum formula for the correlation coefficient
 
-$$r_{xy} = \frac{n\sum x_i y_i - \sum x_i \sum y_i}
+$$
+r_{xy} = \frac{n\sum x_i y_i - \sum x_i \sum y_i}
 {\sqrt{n\sum x_i^2-(\sum x_i)^2} 
- \sqrt{n\sum y_i^2-(\sum y_i)^2}}$$
+ \sqrt{n\sum y_i^2-(\sum y_i)^2}}
+$$
 
 we can see that several sums are calculated, each consisting of adding up $n$ (the sample size) terms. This has to be done for every sample size from the minimum to the maximum one. Thus, the total number of added terms for one sum is:
 
@@ -154,7 +142,7 @@ speedup2(1000, 20, 119)
 # get the 50% quantile to estimate how long on average it takes for fastpos to stop.
 ```
 
-For the typically used $n_\mathrm{max}$ of 1000 and $n_\mathrm{min}$ of 20, we can expect a speedup of about 250. This is only an approximation for several reasons. First, one can stop the process when the corridor is reached, which is done in *fastpos* but not in *corEvol*. Second, the main function of *fastpos* was written in C++ (via *Rcpp*), which is much faster than R. In a direct comparison between *fastpos* and *corEvol* we can expect *fastpos* to be at least 250 times faster.
+For the typically used $n_\mathrm{max}$ of 1000 and $n_\mathrm{min}$ of 20, we can expect a speedup of about 250. This is only an approximation for several reasons. First, one can stop the process when the corridor is reached, which is done in *fastpos* but not in *corEvol*. Second, the main function of *fastpos* was written in C++ (via *Rcpp*), which is much faster than R. At the same time, the algorithms involve many more steps than just calculating correlations. For instance, setting up the population with a specific $\rho$ takes some time since it ususally consists of a million value pairs. The interface functions to setup the simulations also play an important role. Obviously, there is a lower time limit that cannot be beat. Thus, it is necessary to study the speed benefit empirically.
 
 The theoretical difference is so big that it should suffice to give a rough benchmark for which the following parameters were chosen: rho = .1, sample_size_max = 1000, sample_size_min = 20, n_studies = 10000.
 
@@ -175,15 +163,19 @@ corevol <- function() {
   source("02-analyse.R")
 }
 fastpos <- function() {
-  find_critical_pos(rho = .1, sample_size_max = 1e3,
-                    n_studies = 10e3)
+  find_critical_pos(rho = .1, sample_size_max = 1e3, n_studies = 10e3)
 }
 bm <- microbenchmark(corevol = corevol(), fastpos = fastpos(), times = 10,
                      unit = "s")
 bm
 ```
 
-For the chosen parameters, *fastpos* is about 200 times faster than *corEvol*, for which there are two main reasons: (1) *fastpos* is built around a C++ function via *Rcpp* and (2) this function does not calculate every calculation from scratch, but only calculates the difference between the correlation at sample size $n$ and $n-1$ via the sum formula of the Pearson correlation (see above). There are some other factors that might play a role, but they cannot account for the large difference found. For instance, setting up a population takes quite long in *corEvol* (about 20s), but compared to the ~13min required overall, this is only a small fraction. There are other parts of the *corEvol* code that are fated to be slow, but again, a speedup by a factor of 200 cannot be achieved by improving these parts. The presented benchmark is definitely not comprehensive, but only demonstrates that *fastpos* can be used with no significant waiting time for a typical scenario, while for *corEvol* this is not the case.
+```{r include=FALSE}
+speedup <- round(summary(bm)$mean[1] / summary(bm)$mean[2])
+corevol <- round(summary(bm)$mean[1])
+```
+
+For the chosen parameters, *fastpos* is about `r speedup` times faster than *corEvol*, for which there are two main reasons: (1) *fastpos* is built around a C++ function via *Rcpp* and (2) this function does not calculate every calculation from scratch, but only calculates the difference between the correlation at sample size $n$ and $n-1$ via the sum formula of the Pearson correlation (see above). There are some other factors that might play a role, but they cannot account for the large difference found. For instance, setting up a population takes quite long in *corEvol* (about 20s), but compared to the ~`r round(corevol/60)` min required overall, this is only a small fraction. There are other parts of the *corEvol* code that are fated to be slow, but again, a speedup by a factor of `r speedup` cannot be achieved by improving these parts. The presented benchmark is definitely not comprehensive, but only demonstrates that *fastpos* can be used with no significant waiting time for a typical scenario, while for *corEvol* this is not the case.
 
 ## FAQ
 ### What does *fastpos* do if the corridor of stability is not reached for a simulation study?
