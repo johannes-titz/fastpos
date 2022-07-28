@@ -1,10 +1,10 @@
 Package: fastpos
 Type: Package
 Title: Finds the Critical Sequential Point of Stability for a Pearson Correlation
-Version: 0.4.1.9000
-Date: 2022-07-26
+Version: 0.5.0
+Date: 2022-07-28
 Authors@R: person("Johannes", "Titz", email = "johannes.titz@gmail.com",
-  role = c("aut", "cre"), comment = c(ORCID = "0000-0002-1102-5719"))
+  role = c("aut", "cre", "cph"), comment = c(ORCID = "0000-0002-1102-5719"))
 Description: Finds the critical sample size ("critical point of stability") for a 
     correlation to stabilize in Schoenbrodt and Perugini's definition of 
     sequential stability (see <doi:10.1016/j.jrp.2013.05.009>).
