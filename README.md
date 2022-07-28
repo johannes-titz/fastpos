@@ -5,12 +5,11 @@
 
 <!-- badges: start -->
 
-[![Travis build
-status](https://travis-ci.org/johannes-titz/fastpos.svg?branch=master)](https://travis-ci.org/johannes-titz/fastpos)
 [![Codecov test
 coverage](https://codecov.io/gh/johannes-titz/fastpos/branch/master/graph/badge.svg)](https://app.codecov.io/gh/johannes-titz/fastpos?branch=master)
 [![CRAN
 status](https://www.r-pkg.org/badges/version/fastpos)](https://CRAN.R-project.org/package=fastpos)
+[![R-CMD-check](https://github.com/johannes-titz/fastpos/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/johannes-titz/fastpos/actions/workflows/R-CMD-check.yaml)
 <!-- badges: end -->
 
 The R package *fastpos* provides a fast algorithm to calculate the
