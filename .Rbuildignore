@@ -54,3 +54,6 @@ paper_fastpos.odt$
 ^pkgdown$
 ^titz$
 ^\.github$
+^CRAN-SUBMISSION$
+^profiling$
+^clean\.sh$
