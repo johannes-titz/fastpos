@@ -59,5 +59,5 @@ pos <- simulate_pos(x_pop = pop[,1], y_pop = pop[,2], n_studies = 100,
                     replace = TRUE, lower_limit = 0.4, upper_limit = 0.6,
                     progress = TRUE)
 # calculate quantiles or any other parameter of the distribution
-quantile(pos, c(.8, .9, .95), na.rm = TRUE)
+quantile(pos, c(.8, .9, .95))
 }

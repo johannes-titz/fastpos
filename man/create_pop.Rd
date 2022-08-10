@@ -20,6 +20,6 @@ described here:
 https://stats.stackexchange.com/questions/15011/generate-a-random-variable-with-a-defined-correlation-to-an-existing-variables/15040#15040
 }
 \examples{
-pop <- create_pop(rho = 0.5, size = 100000)
+pop <- create_pop(rho = 0.5, size = 1e6)
 cor(pop)
 }

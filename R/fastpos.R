@@ -44,7 +44,7 @@ create_pop_inexact <- function(rho, size) {
 #' @param size Population size.
 #' @return Two-dimensional population matrix with a specific correlation.
 #' @examples
-#' pop <- create_pop(rho = 0.5, size = 100000)
+#' pop <- create_pop(rho = 0.5, size = 1e6)
 #' cor(pop)
 #' @export
 #' @importFrom stats residuals sd rnorm lm.fit
@@ -74,8 +74,8 @@ create_pop <- function(rho, size) {
 #' @importFrom pbapply pblapply
 #' @importFrom tibble lst
 find_one_critical_pos <- function(rho, sample_size_min = 20,
-                                  sample_size_max = 1000,
-                                  replace = TRUE, n_studies = 1000,
+                                  sample_size_max = 1e3,
+                                  replace = TRUE, n_studies = 1e3,
                                   pop_size = 1e6,
                                   precision_absolute = .1,
                                   precision_relative = NA,
@@ -109,7 +109,7 @@ find_one_critical_pos <- function(rho, sample_size_min = 20,
   # create dist of pos
 
   if (n_cores > 1) {
-    res <- unlist(pbapply::pblapply(1:ceiling(n_studies / 1000), function(k)
+    res <- unlist(pbapply::pblapply(1:ceiling(n_studies / 1e3), function(k)
       simulate_pos(x, y, 1e3, sample_size_min,
                    sample_size_max, replace,
                    lower_limit, upper_limit, progress = FALSE),
@@ -164,22 +164,22 @@ find_one_critical_pos <- function(rho, sample_size_min = 20,
 #'   to the quantile of the distribution of all found critical sample sizes (defaults
 #'   to c(.8, .9, .95)). A single value can also be used. Note that this value is fixed
 #'   for all rhos! You cannot specify different levels for different rhos.
-#' @param n_studies Number of studies to run for each rho (defaults to 10e3). A vector
-#'   can be used (different values for different rhos).
 #' @param sample_size_min Minimum sample size for each study (defaults to 20). A vector
 #'   can be used (different values for different rhos).
 #' @param sample_size_max Maximum sample size for each study (defaults to 1e3). A
 #'   vector can be used (different values for different rhos). If you get a warning
 #'   that the corridor of stability was not reached, you should increase this value.
 #'   But note that this will increase the time for the simulation.
+#' @param n_studies Number of studies to run for each rho (defaults to 1e4). A vector
+#'   can be used (different values for different rhos).
+#' @param n_cores Number of cores to use for simulation. Defaults to 1.
+#' @param pop_size Population size (defaults to 1e6). This is the size of the
+#'   population from which value pairs for correlations are drawn. This value should
+#'   usually not be decreased as it can lead to less accurate results.
 #' @param replace Whether drawing samples is with replacement or not. Default is TRUE,
 #'   which usually should not be changed. This parameter is mainly of interest for
 #'   researchers studying the method in more detail. A vector can be used (different
 #'   values for different rhos).
-#' @param pop_size Population size (defaults to 1e6). This is the size of the
-#'   population from which value pairs for correlations are drawn. This value should
-#'   usually not be decreased as it can lead to less accurate results.
-#' @param n_cores Number of cores to use for simulation. Defaults to 1.
 #' @param precision_relative Relative precision around the correlation
 #'   (rho+-rho*precision), if set, it will overwrite precision_absolute. A vector can
 #'   be used (different values for different rhos).
@@ -198,9 +198,9 @@ find_one_critical_pos <- function(rho, sample_size_min = 20,
 #' @return A data frame containing all the above information, as well as the critical
 #'   points of stability.
 #'
-#' The points of stability follow directly after the first column (rho) and are
-#' named pos.confidence-level, e.g. pos.80, pos.90, pos.95 for the default
-#' confidence levels.
+#' The critical points of stability follow directly after the first column (rho)
+#' and are named pos.confidence-level, e.g. pos.80, pos.90, pos.95 for the
+#' default confidence levels.
 #'
 #' @examples
 #' find_critical_pos(rho = 0.5, n_studies = 1e3)
@@ -213,10 +213,10 @@ find_critical_pos <- function(rho,
                               confidence_levels = c(.8, .9, .95),
                               sample_size_min = 20,
                               sample_size_max = 1e3,
-                              replace = TRUE,
-                              n_studies = 1e5,
-                              pop_size = 1e6,
+                              n_studies = 1e4,
                               n_cores = 1,
+                              pop_size = 1e6,
+                              replace = TRUE,
                               precision_relative = NA,
                               lower_limit = NA,
                               upper_limit = NA,
@@ -269,8 +269,9 @@ find_critical_pos <- function(rho,
   summary <- plyr::ldply(summary)
   sum_n_not_breached <- sum(summary$n_not_breached)
   if (sum_n_not_breached > 0) {
-    warning("\n", sum_n_not_breached, " simulation[s] did not reach the corridor of
-            stability", ".\nIncrease sample_size_max and rerun the simulation.",
+    warning("\n", sum_n_not_breached,
+            " simulation[s] did not reach the corridor of stability",
+            ".\nIncrease sample_size_max and rerun the simulation.",
             sep = "")
   }
   summary
