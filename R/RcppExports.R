@@ -49,7 +49,7 @@ simulate_one_pos <- function(x_pop, y_pop, index_pop, sample_size_min, sample_si
 #'                     replace = TRUE, lower_limit = 0.4, upper_limit = 0.6,
 #'                     progress = TRUE)
 #' # calculate quantiles or any other parameter of the distribution
-#' quantile(pos, c(.8, .9, .95), na.rm = TRUE)
+#' quantile(pos, c(.8, .9, .95))
 #' @export
 simulate_pos <- function(x_pop, y_pop, n_studies, sample_size_min, sample_size_max, replace, lower_limit, upper_limit, progress) {
     .Call('_fastpos_simulate_pos', PACKAGE = 'fastpos', x_pop, y_pop, n_studies, sample_size_min, sample_size_max, replace, lower_limit, upper_limit, progress)
