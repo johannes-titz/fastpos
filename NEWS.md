@@ -10,6 +10,8 @@
 * several improvements in the readme, especially for the benchmarks
 * linting the package with lintr
 * deprecate old precision parameters (preparing for version 0.6.0) and rhos
+* improve parameter order
+* use scientific notation more consistently
 * use roxygen md
 
 # fastpos 0.4.1
