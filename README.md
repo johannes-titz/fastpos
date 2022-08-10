@@ -44,7 +44,7 @@ calculation of correlations and achieving
 ![\\mathcal{O}(n)](https://latex.codecogs.com/png.image?%5Cdpi%7B110%7D&space;%5Cbg_white&space;%5Cmathcal%7BO%7D%28n%29 "\mathcal{O}(n)").
 For typical parameters, the theoretical speedup should be at least
 around a factor of 250. An empirical benchmark for a typical scenario
-even shows a speedup of about 400, paving the way for a wider usage of
+even shows a speedup of about 460, paving the way for a wider usage of
 the *stability* approach.
 
 ## Installation
@@ -73,6 +73,7 @@ set a seed for reproducibility:
 
 ``` r
 library(fastpos)
+RNGkind("L'Ecuyer-CMRG")
 set.seed(19950521)
 ```
 
@@ -86,25 +87,25 @@ reduce the number of studies to 10k and use multicore support (only
 works under GNU/Linux) so that it runs fairly quickly.
 
 ``` r
-n_cores <- parallel::detectCores() - 1
+n_cores <- parallel::detectCores()
 find_critical_pos(rho = seq(.1, .7, .1), sample_size_max = 1e3,
                   n_studies = 10e3, n_cores = n_cores)
-#> Warning in find_critical_pos(rho = seq(0.1, 0.7, 0.1), sample_size_max = 1000, : 33 simulation[s] did not reach the corridor of
-#>             stability.
+#> Warning in find_critical_pos(rho = seq(0.1, 0.7, 0.1), sample_size_max = 1000, : 
+#> 40 simulation[s] did not reach the corridor of stability.
 #> Increase sample_size_max and rerun the simulation.
 #>   rho_pop pos.80% pos.90% pos.95% sample_size_min sample_size_max lower_limit
-#> 1     0.1     254   363.0  477.00              20            1000         0.0
-#> 2     0.2     241   341.0  452.05              20            1000         0.1
-#> 3     0.3     214   307.1  406.00              20            1000         0.2
-#> 4     0.4     180   262.0  347.00              20            1000         0.3
-#> 5     0.5     144   209.0  270.00              20            1000         0.4
-#> 6     0.6     105   154.0  203.00              20            1000         0.5
-#> 7     0.7      65    95.1  126.00              20            1000         0.6
+#> 1     0.1   249.0     361  479.00              20            1000         0.0
+#> 2     0.2   238.2     342  446.00              20            1000         0.1
+#> 3     0.3   214.0     309  411.00              20            1000         0.2
+#> 4     0.4   178.0     257  341.00              20            1000         0.3
+#> 5     0.5   143.0     204  271.00              20            1000         0.4
+#> 6     0.6   105.0     151  201.00              20            1000         0.5
+#> 7     0.7    65.0      94  126.05              20            1000         0.6
 #>   upper_limit n_studies n_not_breached precision_absolute precision_relative
-#> 1         0.2     10000             11                0.1                 NA
+#> 1         0.2     10000             23                0.1                 NA
 #> 2         0.3     10000             13                0.1                 NA
-#> 3         0.4     10000              7                0.1                 NA
-#> 4         0.5     10000              2                0.1                 NA
+#> 3         0.4     10000              3                0.1                 NA
+#> 4         0.5     10000              1                0.1                 NA
 #> 5         0.6     10000              0                0.1                 NA
 #> 6         0.7     10000              0                0.1                 NA
 #> 7         0.8     10000              0                0.1                 NA
@@ -144,7 +145,7 @@ hist(pos, xlim = c(0, 1e3), xlab = c("Point of stability"),
 ``` r
 quantile(pos, c(.8, .9, .95), na.rm = T)
 #>   80%   90%   95% 
-#> 142.0 207.0 274.1
+#> 146.0 209.1 280.0
 ```
 
 Note that no warning message appears if the corridor is not reached, but
@@ -202,14 +203,13 @@ multicore <- function() {
   find_critical_pos(0.5, n_cores = n_cores)
 }
 microbenchmark::microbenchmark(onecore(), multicore(), times = 10)
-#> Unit: seconds
-#>         expr       min        lq      mean    median        uq      max neval
-#>    onecore() 26.442229 26.520269 27.271985 27.355036 27.806570 28.42687    10
-#>  multicore()  2.256679  2.384302  2.550777  2.486456  2.522117  3.05895    10
+#> Unit: milliseconds
+#>         expr      min       lq     mean   median       uq      max neval
+#>    onecore() 823.6173 889.5421 917.1853 923.8258 950.8830 967.0792    10
+#>  multicore() 383.7214 400.3065 457.7556 443.7456 467.8412 653.1855    10
 ```
 
-The test was done on a server with 32 cores, but only 31 cores were
-used.
+The test was done on a server with 32 cores.
 
 ## How fast is *fastpos*?
 
@@ -314,15 +314,15 @@ bm <- microbenchmark(corevol = corevol(), fastpos = fastpos(), times = 10,
 #> Lade nötiges Paket: parallel
 bm
 #> Unit: seconds
-#>     expr        min         lq       mean     median         uq        max
-#>  corevol 361.441778 362.906572 363.250371 363.234010 363.817974 364.638600
-#>  fastpos   2.711718   2.723252   2.776013   2.755461   2.832309   2.880485
-#>  neval
-#>     10
-#>     10
+#>     expr         min          lq        mean      median          uq
+#>  corevol 365.2412020 366.1631864 368.7407814 369.2972685 370.7415254
+#>  fastpos   0.7788808   0.7887345   0.8018911   0.7970768   0.8193799
+#>          max neval
+#>  372.3858468    10
+#>    0.8325055    10
 ```
 
-For the chosen parameters, *fastpos* is about 131 times faster than
+For the chosen parameters, *fastpos* is about 460 times faster than
 *corEvol*, for which there are two main reasons: (1) *fastpos* is built
 around a C++ function via *Rcpp* and (2) this function does not
 calculate every calculation from scratch, but only calculates the
@@ -336,7 +336,7 @@ the large difference found. For instance, setting up a population takes
 quite long in *corEvol* (about 20s), but compared to the \~6 min
 required overall, this is only a small fraction. There are other parts
 of the *corEvol* code that are fated to be slow, but again, a speedup by
-a factor of 131 cannot be achieved by improving these parts. The
+a factor of 460 cannot be achieved by improving these parts. The
 presented benchmark is definitely not comprehensive, but only
 demonstrates that *fastpos* can be used with no significant waiting time
 for a typical scenario, while for *corEvol* this is not the case.
