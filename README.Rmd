@@ -1,5 +1,7 @@
 ---
-output: github_document
+output: 
+  github_document:
+    toc: true
 bibliography: "library.bib"
 csl: apa.csl
 ---
@@ -46,7 +48,7 @@ Since you have found this page, I assume you either want to (1) calculate the cr
 
 ```{r setup}
 library(fastpos)
-RNGkind("L'Ecuyer-CMRG")
+#RNGkind("L'Ecuyer-CMRG")
 set.seed(19950521)
 ```
 
@@ -88,25 +90,51 @@ Note that no warning message appears if the corridor is not reached, but instead
 
 Since version 0.4.0 *fastpos* supports multiple cores. My first attempts to implement this were quite unsuccessful because of several reasons: (1) Higher-level parallelism in R makes it difficult to show progress in C++, which is where the important and time-demanding calculations happen (2) some parallelizing solutions do not work on all operating systems (e.g. mcpbapply) (3) overhead can be quite large, especially for a small number of simulation runs.
 
-I thought the best solution is is to directly parallelize in C++. I tried to do it with *RcppThread*, but in the end this was even slower than singlethreading. I assume that a more experienced C++ programmer could make it work but to me parallelizing in C++ feels a bit like torture.
+I thought the best solution is is to directly parallelize in C++. I tried to do it with *RcppThread*, but in the end this was even slower than singlethreading. Maybe the overhead of setting up multiple threads outweighs sharing the work.
 
 My intermediate solution was quite simple and pragmatic: to use *futures*. I divided the number of studies by the available cores $n$, then started $n-1$ simulations via futures in a multisession plan. Meanwhile the main R process also started a simulation, which showed a progress bar in C++. All simulations ended at approximately the same time, the progress bar finished and the futures resolved. The points of stability were combined and the rest of the program worked as for the singlethreaded version.
 
-Unfortunately this solution did not bring any substantial speed benefits. Since version 0.5.0 I switched to the parallel package and pbapply. This means there is no multicore support for Windows but the implementation is simple and shows substantial speed benefits.
+Unfortunately this solution did not bring any substantial speed benefits. Since version 0.5.0 I switched to the parallel package and pbapply. This means there is no multicore support for Windows but the implementation is simple and shows speed benefits when the number of studies or the maximum sample size is large.
 
-Even for small simulations these benefits are clearly visible:
+For small simulations the benefits are negligible because fastpos is already quite fast and the overhead of sharing work is hard to compensate:
 
 ```{r parallel1, message=FALSE, warning=FALSE}
 onecore <- function() {
-  find_critical_pos(0.5)
+  find_critical_pos(0.5, n_studies = 1e4, progress = FALSE)
 }
 multicore <- function() {
-  find_critical_pos(0.5, n_cores = n_cores)
+  find_critical_pos(0.5, n_studies = 1e4, n_cores = n_cores, progress = FALSE)
 }
 microbenchmark::microbenchmark(onecore(), multicore(), times = 10)
 ```
 
-The test was done on a server with 32 cores.
+Increasing the number of studies to 100,000 results in larger gains:
+
+```{r parallel2, message=FALSE, warning=FALSE}
+onecore <- function() {
+  find_critical_pos(0.5, n_studies = 1e5, progress = FALSE)
+}
+multicore <- function() {
+  find_critical_pos(0.5, n_studies = 1e5, n_cores = n_cores, progress = FALSE)
+}
+microbenchmark::microbenchmark(onecore(), multicore(), times = 10)
+```
+
+The maximum sample size also affects the speed benefit:
+
+```{r parallel3, message=FALSE, warning=FALSE}
+onecore <- function() {
+  find_critical_pos(0.5, n_studies = 1e5, sample_size_max = 5e3,
+                    progress = FALSE)
+}
+multicore <- function() {
+  find_critical_pos(0.5, n_studies = 1e5, sample_size_max = 5e3,
+                    n_cores = n_cores - 1, progress = FALSE)
+}
+microbenchmark::microbenchmark(onecore(), multicore(), times = 10)
+```
+
+The test was done on a server with 32 cores. In general, the multicore support in fastpos is not perfect because the optimal split of work heavily depends on the specific parameters. In the future I hope to find a better way to implement multiple cores.
 
 ## How fast is *fastpos*?
 

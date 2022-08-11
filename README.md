@@ -1,4 +1,19 @@
 
+-   [fastpos](#fastpos)
+    -   [Installation](#installation)
+    -   [Using *fastpos*](#using-fastpos)
+    -   [Parallelization](#parallelization)
+    -   [How fast is *fastpos*?](#how-fast-is-fastpos)
+    -   [FAQ](#faq)
+        -   [What does *fastpos* do if the corridor of stability is not
+            reached for a simulation
+            study?](#what-does-fastpos-do-if-the-corridor-of-stability-is-not-reached-for-a-simulation-study)
+        -   [Why does *fastpos* produce different estimates to
+            *corEvol*?](#why-does-fastpos-produce-different-estimates-to-corevol)
+    -   [Issues and Support](#issues-and-support)
+    -   [Contributing](#contributing)
+    -   [References](#references)
+
 <!-- README.md is generated from README.Rmd. Please edit that file -->
 
 # fastpos
@@ -73,7 +88,7 @@ set a seed for reproducibility:
 
 ``` r
 library(fastpos)
-RNGkind("L'Ecuyer-CMRG")
+#RNGkind("L'Ecuyer-CMRG")
 set.seed(19950521)
 ```
 
@@ -173,9 +188,8 @@ number of simulation runs.
 
 I thought the best solution is is to directly parallelize in C++. I
 tried to do it with *RcppThread*, but in the end this was even slower
-than singlethreading. I assume that a more experienced C++ programmer
-could make it work but to me parallelizing in C++ feels a bit like
-torture.
+than singlethreading. Maybe the overhead of setting up multiple threads
+outweighs sharing the work.
 
 My intermediate solution was quite simple and pragmatic: to use
 *futures*. I divided the number of studies by the available cores
@@ -191,25 +205,65 @@ and the rest of the program worked as for the singlethreaded version.
 Unfortunately this solution did not bring any substantial speed
 benefits. Since version 0.5.0 I switched to the parallel package and
 pbapply. This means there is no multicore support for Windows but the
-implementation is simple and shows substantial speed benefits.
+implementation is simple and shows speed benefits when the number of
+studies or the maximum sample size is large.
 
-Even for small simulations these benefits are clearly visible:
+For small simulations the benefits are negligible because fastpos is
+already quite fast and the overhead of sharing work is hard to
+compensate:
 
 ``` r
 onecore <- function() {
-  find_critical_pos(0.5)
+  find_critical_pos(0.5, n_studies = 1e4, progress = FALSE)
 }
 multicore <- function() {
-  find_critical_pos(0.5, n_cores = n_cores)
+  find_critical_pos(0.5, n_studies = 1e4, n_cores = n_cores, progress = FALSE)
 }
 microbenchmark::microbenchmark(onecore(), multicore(), times = 10)
 #> Unit: milliseconds
 #>         expr      min       lq     mean   median       uq      max neval
-#>    onecore() 823.6173 889.5421 917.1853 923.8258 950.8830 967.0792    10
-#>  multicore() 383.7214 400.3065 457.7556 443.7456 467.8412 653.1855    10
+#>    onecore() 794.0160 834.3565 915.9605 951.0493 955.0048 1027.643    10
+#>  multicore() 380.2165 403.6292 438.8679 442.7043 475.0725  505.001    10
 ```
 
-The test was done on a server with 32 cores.
+Increasing the number of studies to 100,000 results in larger gains:
+
+``` r
+onecore <- function() {
+  find_critical_pos(0.5, n_studies = 1e5, progress = FALSE)
+}
+multicore <- function() {
+  find_critical_pos(0.5, n_studies = 1e5, n_cores = n_cores, progress = FALSE)
+}
+microbenchmark::microbenchmark(onecore(), multicore(), times = 10)
+#> Unit: seconds
+#>         expr      min       lq     mean   median       uq      max neval
+#>    onecore() 5.979656 6.098383 6.135590 6.132114 6.164712 6.325328    10
+#>  multicore() 1.557414 1.590791 1.790834 1.657108 1.716881 2.453932    10
+```
+
+The maximum sample size also affects the speed benefit:
+
+``` r
+onecore <- function() {
+  find_critical_pos(0.5, n_studies = 1e5, sample_size_max = 5e3,
+                    progress = FALSE)
+}
+multicore <- function() {
+  find_critical_pos(0.5, n_studies = 1e5, sample_size_max = 5e3,
+                    n_cores = n_cores - 1, progress = FALSE)
+}
+microbenchmark::microbenchmark(onecore(), multicore(), times = 10)
+#> Unit: seconds
+#>         expr      min        lq      mean   median        uq       max neval
+#>    onecore() 26.99386 27.241518 27.630681 27.45023 28.037024 28.485631    10
+#>  multicore()  4.82019  4.989477  5.374248  5.10881  5.860666  6.359141    10
+```
+
+The test was done on a server with 32 cores. In general, the multicore
+support in fastpos is not perfect because the optimal split of work
+heavily depends on the specific parameters. In the future I hope to find
+a better way to implement multiple cores.
 
 ## How fast is *fastpos*?
 
