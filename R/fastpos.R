@@ -110,13 +110,16 @@ find_one_critical_pos <- function(rho, sample_size_min = 20,
   # create dist of pos
 
   n_actual_cores <- ceiling(n_studies / n_studies_per_core)
-
+  if (n_cores < n_actual_cores) {
+    n_actual_cores <- n_cores
+  }
   if (n_cores > 1 & n_actual_cores >= 2) {
     res <- unlist(pbmcapply::pbmclapply(1:n_actual_cores, function(k)
       simulate_pos(x, y, n_studies_per_core, sample_size_min,
                    sample_size_max, replace,
                    lower_limit, upper_limit, progress = FALSE),
-      mc.cores = n_cores
+      mc.cores = n_actual_cores,
+      mc.set.seed = TRUE
     ))
   } else {
     res <- simulate_pos(x, y, n_studies, sample_size_min, sample_size_max, replace,
