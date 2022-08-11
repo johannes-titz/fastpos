@@ -1,3 +1,5 @@
+# 
+
 # 0.5.0
 
 * improve multicore support, pbapply is now used to split up the calculation of points of stability; this is much faster than with futures but does not work on Windows
