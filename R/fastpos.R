@@ -71,7 +71,7 @@ create_pop <- function(rho, size) {
 #' find_one_critical_pos(rho = 0.5)
 #' @noRd
 #' @importFrom stats cor quantile
-#' @importFrom pbapply pblapply
+#' @importFrom pbmcapply pbmclapply
 #' @importFrom tibble lst
 find_one_critical_pos <- function(rho, sample_size_min = 20,
                                   sample_size_max = 1e3,
