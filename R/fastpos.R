@@ -81,7 +81,6 @@ find_one_critical_pos <- function(rho, sample_size_min = 20,
                                   precision_relative = NA,
                                   confidence_levels = c(.8, .9, .95),
                                   n_cores = 1,
-                                  n_studies_per_core = 1e4,
                                   lower_limit = NA,
                                   upper_limit = NA,
                                   progress = show_progress()) {
@@ -108,18 +107,14 @@ find_one_critical_pos <- function(rho, sample_size_min = 20,
   rho_pop <- stats::cor(x, y)
 
   # create dist of pos
-
-  n_actual_cores <- ceiling(n_studies / n_studies_per_core)
-  if (n_cores < n_actual_cores) {
-    n_actual_cores <- n_cores
-  }
-  if (n_cores > 1 & n_actual_cores >= 2) {
-    res <- unlist(pbmcapply::pbmclapply(1:n_actual_cores, function(k)
+  n_studies_per_core <- ceiling(n_studies / n_cores)
+  if (n_cores > 1) {
+    res <- unlist(pbmcapply::pbmclapply(1:n_cores, function(k)
       simulate_pos(x, y, n_studies_per_core, sample_size_min,
                    sample_size_max, replace,
                    lower_limit, upper_limit, progress = FALSE),
-      mc.cores = n_actual_cores,
-      mc.set.seed = TRUE
+      mc.cores = n_cores,
+      mc.set.seed = FALSE
     ))
   } else {
     res <- simulate_pos(x, y, n_studies, sample_size_min, sample_size_max, replace,
@@ -180,13 +175,6 @@ find_one_critical_pos <- function(rho, sample_size_min = 20,
 #'   can be used (different values for different rhos).
 #' @param n_cores Number of cores to use for simulation. Defaults to 1. Under
 #'   Windows only 1 core is supported because forking is used.
-#' @param n_studies_per_core Number of studies per core. Defaults to 1e4. This
-#'   allows for a better control of parallel computing. The ideal number of
-#'   cores and studies per core depend on the specific parameters. It is best to
-#'   start with 1 core and find the number of studies (parameter n_studies) for
-#'   which the simulation runs in a few seconds. Then increase the number of
-#'   cores and use this number of studies for n_studies_per_core. The default of
-#'   1e4 should be fine for most cases.
 #' @param pop_size Population size (defaults to 1e6). This is the size of the
 #'   population from which value pairs for correlations are drawn. This value should
 #'   usually not be decreased as it can lead to less accurate results.
@@ -229,7 +217,6 @@ find_critical_pos <- function(rho,
                               sample_size_max = 1e3,
                               n_studies = 1e4,
                               n_cores = 1,
-                              n_studies_per_core = 1e4,
                               pop_size = 1e6,
                               replace = TRUE,
                               precision_relative = NA,
@@ -281,7 +268,6 @@ find_critical_pos <- function(rho,
                    upper_limit = upper_limit,
                    MoreArgs = list(confidence_levels = confidence_levels,
                                    n_cores = n_cores,
-                                   n_studies_per_core = n_studies_per_core,
                                    pop_size = pop_size,
                                    progress = progress),
                    SIMPLIFY = FALSE)
