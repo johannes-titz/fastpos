@@ -71,7 +71,7 @@ create_pop <- function(rho, size) {
 #' find_one_critical_pos(rho = 0.5)
 #' @noRd
 #' @importFrom stats cor quantile
-#' @importFrom pbmcapply pbmclapply
+#' @importFrom future future value
 #' @importFrom tibble lst
 find_one_critical_pos <- function(rho, sample_size_min = 20,
                                   sample_size_max = 1e3,
@@ -108,16 +108,26 @@ find_one_critical_pos <- function(rho, sample_size_min = 20,
 
   # create dist of pos
 
-  if (n_cores > 1) {
-    res <- unlist(pbmcapply::pbmclapply(1:ceiling(n_studies / 1e4), function(k)
-      simulate_pos(x, y, 1e4, sample_size_min,
-                   sample_size_max, replace,
-                   lower_limit, upper_limit, progress = FALSE),
-      mc.cores = n_cores
-    ))
+ # we will use 1 normal invocation and n_cores - 1 futures, this way we have
+  # a progress bar
+  if (n_cores > 1){
+    f <- list()
+    for (ii in seq(n_cores - 1)) { # -1 because we run one outside of multisession
+      f[[ii]] <- future::future({
+        simulate_pos(x, y, ceiling(n_studies/(n_cores)), sample_size_min,
+                     sample_size_max, replace, lower_limit, upper_limit,
+                     progress = FALSE)
+      }, seed = TRUE)
+    }
+    res <- simulate_pos(x, y, ceiling(n_studies/n_cores), sample_size_min,
+                        sample_size_max, replace, lower_limit, upper_limit,
+                        progress = TRUE)
+    v <- unlist(lapply(f, FUN = future::value))
+    res <- c(res, v)
   } else {
-    res <- simulate_pos(x, y, n_studies, sample_size_min, sample_size_max, replace,
-                        lower_limit, upper_limit, progress)
+    res <- simulate_pos(x, y, n_studies, sample_size_min, sample_size_max, T,
+                        lower_limit, upper_limit,
+                        progress = TRUE)
   }
 
   # on interruption, C++ will return -1 (if R interrupts by itself, nothing
