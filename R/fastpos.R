@@ -224,6 +224,10 @@ find_critical_pos <- function(rho,
                               precision = lifecycle::deprecated(),
                               precision_rel = lifecycle::deprecated(),
                               rhos = lifecycle::deprecated()) {
+  if (.Platform$OS.type == "windows" & n_cores > 1) {
+    n_cores <- 1
+    warnings("On Windows only one core can be used. Sorry.")
+  }
   if (lifecycle::is_present(precision)) {
     lifecycle::deprecate_warn(
       when = "0.6.0",
