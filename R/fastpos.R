@@ -109,8 +109,8 @@ find_one_critical_pos <- function(rho, sample_size_min = 20,
   # create dist of pos
 
   if (n_cores > 1) {
-    res <- unlist(pbmcapply::pbmclapply(1:ceiling(n_studies / 1e3), function(k)
-      simulate_pos(x, y, 1e3, sample_size_min,
+    res <- unlist(pbmcapply::pbmclapply(1:ceiling(n_studies / 1e4), function(k)
+      simulate_pos(x, y, 1e4, sample_size_min,
                    sample_size_max, replace,
                    lower_limit, upper_limit, progress = FALSE),
       mc.cores = n_cores
