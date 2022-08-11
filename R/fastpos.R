@@ -71,7 +71,7 @@ create_pop <- function(rho, size) {
 #' find_one_critical_pos(rho = 0.5)
 #' @noRd
 #' @importFrom stats cor quantile
-#' @importFrom future future value
+#' @importFrom pbmcapply pbmclapply
 #' @importFrom tibble lst
 find_one_critical_pos <- function(rho, sample_size_min = 20,
                                   sample_size_max = 1e3,
@@ -81,6 +81,7 @@ find_one_critical_pos <- function(rho, sample_size_min = 20,
                                   precision_relative = NA,
                                   confidence_levels = c(.8, .9, .95),
                                   n_cores = 1,
+                                  n_studies_per_core = 1e4,
                                   lower_limit = NA,
                                   upper_limit = NA,
                                   progress = show_progress()) {
@@ -108,26 +109,18 @@ find_one_critical_pos <- function(rho, sample_size_min = 20,
 
   # create dist of pos
 
- # we will use 1 normal invocation and n_cores - 1 futures, this way we have
-  # a progress bar
-  if (n_cores > 1){
-    f <- list()
-    for (ii in seq(n_cores - 1)) { # -1 because we run one outside of multisession
-      f[[ii]] <- future::future({
-        simulate_pos(x, y, ceiling(n_studies/(n_cores)), sample_size_min,
-                     sample_size_max, replace, lower_limit, upper_limit,
-                     progress = FALSE)
-      }, seed = TRUE)
-    }
-    res <- simulate_pos(x, y, ceiling(n_studies/n_cores), sample_size_min,
-                        sample_size_max, replace, lower_limit, upper_limit,
-                        progress = TRUE)
-    v <- unlist(lapply(f, FUN = future::value))
-    res <- c(res, v)
+  n_actual_cores <- ceiling(n_studies / n_studies_per_core)
+
+  if (n_cores > 1 & n_actual_cores >= 2) {
+    res <- unlist(pbmcapply::pbmclapply(1:n_actual_cores, function(k)
+      simulate_pos(x, y, n_studies_per_core, sample_size_min,
+                   sample_size_max, replace,
+                   lower_limit, upper_limit, progress = FALSE),
+      mc.cores = n_cores
+    ))
   } else {
-    res <- simulate_pos(x, y, n_studies, sample_size_min, sample_size_max, T,
-                        lower_limit, upper_limit,
-                        progress = TRUE)
+    res <- simulate_pos(x, y, n_studies, sample_size_min, sample_size_max, replace,
+                        lower_limit, upper_limit, progress)
   }
 
   # on interruption, C++ will return -1 (if R interrupts by itself, nothing
@@ -182,7 +175,15 @@ find_one_critical_pos <- function(rho, sample_size_min = 20,
 #'   But note that this will increase the time for the simulation.
 #' @param n_studies Number of studies to run for each rho (defaults to 1e4). A vector
 #'   can be used (different values for different rhos).
-#' @param n_cores Number of cores to use for simulation. Defaults to 1.
+#' @param n_cores Number of cores to use for simulation. Defaults to 1. Under
+#'   Windows only 1 core is supported because forking is used.
+#' @param n_studies_per_core Number of studies per core. Defaults to 1e4. This
+#'   allows for a better control of parallel computing. The ideal number of
+#'   cores and studies per core depend on the specific parameters. It is best to
+#'   start with 1 core and find the number of studies (parameter n_studies) for
+#'   which the simulation runs in a few seconds. Then increase the number of
+#'   cores and use this number of studies for n_studies_per_core. The default of
+#'   1e4 should be fine for most cases.
 #' @param pop_size Population size (defaults to 1e6). This is the size of the
 #'   population from which value pairs for correlations are drawn. This value should
 #'   usually not be decreased as it can lead to less accurate results.
@@ -225,6 +226,7 @@ find_critical_pos <- function(rho,
                               sample_size_max = 1e3,
                               n_studies = 1e4,
                               n_cores = 1,
+                              n_studies_per_core = 1e4,
                               pop_size = 1e6,
                               replace = TRUE,
                               precision_relative = NA,
@@ -276,6 +278,7 @@ find_critical_pos <- function(rho,
                    upper_limit = upper_limit,
                    MoreArgs = list(confidence_levels = confidence_levels,
                                    n_cores = n_cores,
+                                   n_studies_per_core = n_studies_per_core,
                                    pop_size = pop_size,
                                    progress = progress),
                    SIMPLIFY = FALSE)

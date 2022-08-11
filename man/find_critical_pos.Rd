@@ -12,6 +12,7 @@ find_critical_pos(
   sample_size_max = 1000,
   n_studies = 10000,
   n_cores = 1,
+  n_studies_per_core = 10000,
   pop_size = 1e+06,
   replace = TRUE,
   precision_relative = NA,
@@ -47,7 +48,16 @@ But note that this will increase the time for the simulation.}
 \item{n_studies}{Number of studies to run for each rho (defaults to 1e4). A vector
 can be used (different values for different rhos).}
 
-\item{n_cores}{Number of cores to use for simulation. Defaults to 1.}
+\item{n_cores}{Number of cores to use for simulation. Defaults to 1. Under
+Windows only 1 core is supported because forking is used.}
+
+\item{n_studies_per_core}{Number of studies per core. Defaults to 1e4. This
+allows for a better control of parallel computing. The ideal number of
+cores and studies per core depend on the specific parameters. It is best to
+start with 1 core and find the number of studies (parameter n_studies) for
+which the simulation runs in a few seconds. Then increase the number of
+cores and use this number of studies for n_studies_per_core. The default of
+1e4 should be fine for most cases.}
 
 \item{pop_size}{Population size (defaults to 1e6). This is the size of the
 population from which value pairs for correlations are drawn. This value should
