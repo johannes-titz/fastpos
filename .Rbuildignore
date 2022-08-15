@@ -58,3 +58,4 @@ paper_fastpos.odt$
 ^profiling$
 ^clean\.sh$
 ^test\.R$
+^benchmarks$

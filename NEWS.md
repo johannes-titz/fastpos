@@ -1,6 +1,10 @@
-# 
+# fastpos 0.5.1
 
-# 0.5.0
+* fix problem with multicore support, now correct functions are used from pbmcapply
+* add info in documentation and warning that on Windows only 1 core is used
+* add toc to readme
+
+# fastpos 0.5.0
 
 * improve multicore support, pbapply is now used to split up the calculation of points of stability; this is much faster than with futures but does not work on Windows
 * give the option to set the corridor manually via lower_limit and upper_limit, which will override precision parameters
