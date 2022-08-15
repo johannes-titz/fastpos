@@ -88,8 +88,9 @@ set a seed for reproducibility:
 
 ``` r
 library(fastpos)
-#RNGkind("L'Ecuyer-CMRG")
-set.seed(19950521)
+RNGkind("L'Ecuyer-CMRG")
+set.seed(20220812)
+parallel::mc.reset.stream()
 ```
 
 In most cases you will just need the function **find_critical_pos**
@@ -97,33 +98,33 @@ which will give you the critical point of stability for your specific
 parameters.
 
 Let us reproduce Schönbrodt and Perugini’s quite famous and oft-cited
-table of the critical points of stability for a precision of 0.1. We
-reduce the number of studies to 10k and use multicore support (only
-works under GNU/Linux) so that it runs fairly quickly.
+table of the critical points of stability for a precision of 0.1. We set
+the number of studies to 100k and use multicore support (only works
+under GNU/Linux) so that it runs fairly quickly.
 
 ``` r
 n_cores <- parallel::detectCores()
 find_critical_pos(rho = seq(.1, .7, .1), sample_size_max = 1e3,
-                  n_studies = 10e3, n_cores = n_cores)
+                  n_studies = 1e5, n_cores = n_cores)
 #> Warning in find_critical_pos(rho = seq(0.1, 0.7, 0.1), sample_size_max = 1000, : 
-#> 40 simulation[s] did not reach the corridor of stability.
+#> 448 simulation[s] did not reach the corridor of stability.
 #> Increase sample_size_max and rerun the simulation.
 #>   rho_pop pos.80% pos.90% pos.95% sample_size_min sample_size_max lower_limit
-#> 1     0.1   249.0     361  479.00              20            1000         0.0
-#> 2     0.2   238.2     342  446.00              20            1000         0.1
-#> 3     0.3   214.0     309  411.00              20            1000         0.2
-#> 4     0.4   178.0     257  341.00              20            1000         0.3
-#> 5     0.5   143.0     204  271.00              20            1000         0.4
-#> 6     0.6   105.0     151  201.00              20            1000         0.5
-#> 7     0.7    65.0      94  126.05              20            1000         0.6
+#> 1     0.1   257.0     362     478              20            1000         0.0
+#> 2     0.2   244.2     355     467              20            1000         0.1
+#> 3     0.3   213.0     306     403              20            1000         0.2
+#> 4     0.4   182.0     265     352              20            1000         0.3
+#> 5     0.5   142.0     217     288              20            1000         0.4
+#> 6     0.6   108.0     159     209              20            1000         0.5
+#> 7     0.7    64.0     100     134              20            1000         0.6
 #>   upper_limit n_studies n_not_breached precision_absolute precision_relative
-#> 1         0.2     10000             23                0.1                 NA
-#> 2         0.3     10000             13                0.1                 NA
-#> 3         0.4     10000              3                0.1                 NA
-#> 4         0.5     10000              1                0.1                 NA
-#> 5         0.6     10000              0                0.1                 NA
-#> 6         0.7     10000              0                0.1                 NA
-#> 7         0.8     10000              0                0.1                 NA
+#> 1         0.2     1e+05            192                0.1                 NA
+#> 2         0.3     1e+05            192                0.1                 NA
+#> 3         0.4     1e+05              0                0.1                 NA
+#> 4         0.5     1e+05             64                0.1                 NA
+#> 5         0.6     1e+05              0                0.1                 NA
+#> 6         0.7     1e+05              0                0.1                 NA
+#> 7         0.8     1e+05              0                0.1                 NA
 ```
 
 The results are very close to Schönbrodt and Perugini’s table (see
@@ -144,7 +145,7 @@ right?). A rawish approach would be to create a population with
 pop <- create_pop(0.5, 1e6)
 pos <- simulate_pos(x_pop = pop[,1],
                     y_pop = pop[,2],
-                    n_studies = 1e4,
+                    n_studies = 1e5,
                     sample_size_min = 20,
                     sample_size_max = 1e3,
                     replace = T,
@@ -159,8 +160,8 @@ hist(pos, xlim = c(0, 1e3), xlab = c("Point of stability"),
 
 ``` r
 quantile(pos, c(.8, .9, .95), na.rm = T)
-#>   80%   90%   95% 
-#> 146.0 209.1 280.0
+#> 80% 90% 95% 
+#> 144 208 276
 ```
 
 Note that no warning message appears if the corridor is not reached, but
@@ -204,15 +205,14 @@ and the rest of the program worked as for the singlethreaded version.
 
 Unfortunately this solution did not bring any substantial speed
 benefits. Since version 0.5.0 I switched to the parallel package and
-pbapply. This means there is no multicore support for Windows but the
-implementation is simple and shows speed benefits when the number of
-studies or the maximum sample size is large.
+pbmclapply. This means there is no multicore support for Windows but the
+implementation is simple and shows clear speed benefits.
 
-For small simulations the benefits are negligible because fastpos is
-already quite fast and the overhead of sharing work is hard to
-compensate:
+For small simulations there is no speed benefit because fastpos is
+already too fast:
 
 ``` r
+n_cores <- parallel::detectCores()
 onecore <- function() {
   find_critical_pos(0.5, n_studies = 1e4, progress = FALSE)
 }
@@ -222,43 +222,98 @@ multicore <- function() {
 microbenchmark::microbenchmark(onecore(), multicore(), times = 10)
 #> Unit: milliseconds
 #>         expr      min       lq     mean   median       uq      max neval
-#>    onecore() 794.0160 834.3565 915.9605 951.0493 955.0048 1027.643    10
-#>  multicore() 380.2165 403.6292 438.8679 442.7043 475.0725  505.001    10
+#>    onecore() 790.5424 806.0623 880.9228 898.5692 914.1386 995.4131    10
+#>  multicore() 492.5743 507.3975 532.6609 519.9019 551.4526 617.7952    10
 ```
 
-Increasing the number of studies to 100,000 results in larger gains:
+Increasing the number of studies to 1,000,000 makes the speed benefit
+more visible:
 
 ``` r
 onecore <- function() {
-  find_critical_pos(0.5, n_studies = 1e5, progress = FALSE)
+  find_critical_pos(0.5, n_studies = 1e6, progress = FALSE)
 }
 multicore <- function() {
-  find_critical_pos(0.5, n_studies = 1e5, n_cores = n_cores, progress = FALSE)
+  find_critical_pos(0.5, n_studies = 1e6, n_cores = n_cores, progress = FALSE)
 }
 microbenchmark::microbenchmark(onecore(), multicore(), times = 10)
 #> Unit: seconds
-#>         expr      min       lq     mean   median       uq      max neval
-#>    onecore() 5.979656 6.098383 6.135590 6.132114 6.164712 6.325328    10
-#>  multicore() 1.557414 1.590791 1.790834 1.657108 1.716881 2.453932    10
+#>         expr       min        lq     mean   median       uq      max neval
+#>    onecore() 57.639320 58.015838 58.85051 58.97313 59.24430 60.16749    10
+#>  multicore()  9.254999  9.753195 11.80759 10.91989 11.91047 18.94043    10
 ```
 
 The maximum sample size also affects the speed benefit:
 
 ``` r
 onecore <- function() {
-  find_critical_pos(0.5, n_studies = 1e5, sample_size_max = 5e3,
+  find_critical_pos(0.5, n_studies = 1e4, sample_size_max = 1e4,
                     progress = FALSE)
 }
 multicore <- function() {
-  find_critical_pos(0.5, n_studies = 1e5, sample_size_max = 5e3,
-                    n_cores = n_cores - 1, progress = FALSE)
+  find_critical_pos(0.5, n_studies = 1e4, sample_size_max = 1e4,
+                    n_cores = n_cores, progress = FALSE)
 }
 microbenchmark::microbenchmark(onecore(), multicore(), times = 10)
 #> Unit: seconds
-#>         expr      min        lq      mean   median        uq       max neval
-#>    onecore() 26.99386 27.241518 27.630681 27.45023 28.037024 28.485631    10
-#>  multicore()  4.82019  4.989477  5.374248  5.10881  5.860666  6.359141    10
+#>         expr      min       lq     mean   median       uq      max neval
+#>    onecore() 5.578969 5.670123 5.740891 5.733023 5.820454 5.971168    10
+#>  multicore() 1.387514 1.411387 1.660138 1.444922 2.142137 2.184948    10
 ```
+
+Using more than around 10 cores does not seem to bring additional speed
+benefits:
+
+``` r
+cores <- function(n_cores) {
+    bquote(find_critical_pos(0.5, n_studies = 1e5, sample_size_max = 5e3,
+                    n_cores = .(n_cores),
+                    progress = FALSE))
+}
+
+function_list <- lapply(1:n_cores, cores)
+names(function_list) <- 1:n_cores
+mb <- microbenchmark::microbenchmark(list = function_list, times = 10,
+                                     unit = "s")
+mb
+#> Unit: seconds
+#>  expr       min        lq      mean    median        uq       max neval
+#>     1 27.456555 27.570735 27.818499 27.745047 27.998901 28.552284    10
+#>     2 14.386780 14.762170 14.799019 14.846158 14.891730 15.063332    10
+#>     3 10.079521 10.272135 10.398187 10.449643 10.493651 10.690283    10
+#>     4  7.786282  8.043653  8.123207  8.137474  8.174227  8.430836    10
+#>     5  6.394230  6.457601  6.562601  6.559623  6.609138  6.833768    10
+#>     6  5.493741  5.529108  5.677393  5.598711  5.857732  6.020727    10
+#>     7  4.857490  4.957679  5.010991  5.000947  5.095433  5.150672    10
+#>     8  4.501819  4.587342  4.653510  4.633522  4.721233  4.805759    10
+#>     9  4.310806  4.513649  4.535217  4.531089  4.575051  4.703378    10
+#>    10  4.302939  4.430716  4.556707  4.584788  4.648966  4.776502    10
+#>    11  4.355230  4.508450  4.644879  4.641629  4.752381  5.003795    10
+#>    12  4.141649  4.423738  4.629711  4.631150  4.817210  5.073758    10
+#>    13  4.190796  4.631710  4.703205  4.683888  4.884239  4.962240    10
+#>    14  4.389556  4.602093  4.745577  4.769075  4.890196  5.188714    10
+#>    15  4.469471  4.506780  4.713059  4.686050  4.877884  5.059185    10
+#>    16  4.172919  4.647434  4.666889  4.674721  4.853175  4.959688    10
+#>    17  4.396954  4.569385  4.693250  4.604388  4.814465  5.140367    10
+#>    18  4.448788  4.735557  4.902612  4.940298  5.105664  5.359574    10
+#>    19  4.524529  4.860833  4.993857  4.930301  5.044446  5.557180    10
+#>    20  4.903637  4.956342  5.144836  5.080159  5.318339  5.487320    10
+#>    21  4.649297  4.967157  5.164920  5.219511  5.281292  5.579557    10
+#>    22  4.590055  4.900174  5.218636  5.212350  5.616280  5.841419    10
+#>    23  4.735541  5.040456  5.291030  5.239354  5.659753  5.688474    10
+#>    24  4.634694  4.751584  5.039350  5.088603  5.243414  5.608231    10
+#>    25  4.832792  5.021327  5.216380  5.202682  5.397915  5.566497    10
+#>    26  4.510734  4.954355  5.111006  5.107665  5.315212  5.908580    10
+#>    27  5.085392  5.151006  5.395888  5.369852  5.663524  5.772946    10
+#>    28  4.883048  5.207972  5.294213  5.271934  5.550639  5.631980    10
+#>    29  4.838274  5.086868  5.431193  5.409469  5.821201  5.960367    10
+#>    30  4.970278  5.046102  5.434072  5.480559  5.805406  6.055113    10
+#>    31  4.925469  5.105361  5.487184  5.509620  5.662650  6.186354    10
+#>    32  5.014134  5.193149  5.376090  5.405113  5.561297  5.659123    10
+plot(mb)
+```
+
+<img src="man/figures/README-parallel4-1.png" width="100%" />
 
 The test was done on a server with 32 cores. In general, the multicore
 support in fastpos is not perfect because the optimal split of work
@@ -351,29 +406,19 @@ corevol <- function() {
   source("02-analyse.R")
 }
 fastpos <- function() {
-  find_critical_pos(rho = .1, sample_size_max = 1e3, n_studies = 10e3)
+  find_critical_pos(rho = .1, sample_size_max = 1e3, n_studies = 10e3,
+                    progress = FALSE)
 }
 bm <- microbenchmark(corevol = corevol(), fastpos = fastpos(), times = 10,
                      unit = "s")
-#> 
-#> Attache Paket: 'dplyr'
-#> Die folgenden Objekte sind maskiert von 'package:stats':
-#> 
-#>     filter, lag
-#> Die folgenden Objekte sind maskiert von 'package:base':
-#> 
-#>     intersect, setdiff, setequal, union
-#> Lade nötiges Paket: foreach
-#> Lade nötiges Paket: iterators
-#> Lade nötiges Paket: parallel
 bm
 #> Unit: seconds
 #>     expr         min          lq        mean      median          uq
-#>  corevol 365.2412020 366.1631864 368.7407814 369.2972685 370.7415254
-#>  fastpos   0.7788808   0.7887345   0.8018911   0.7970768   0.8193799
+#>  corevol 363.2943526 365.8412867 366.8502931 366.7658715 367.2626313
+#>  fastpos   0.7604255   0.7855696   0.8164049   0.7999461   0.8071823
 #>          max neval
-#>  372.3858468    10
-#>    0.8325055    10
+#>  371.6549927    10
+#>    0.9890917    10
 ```
 
 For the chosen parameters, *fastpos* is about 460 times faster than

@@ -48,18 +48,19 @@ Since you have found this page, I assume you either want to (1) calculate the cr
 
 ```{r setup}
 library(fastpos)
-#RNGkind("L'Ecuyer-CMRG")
-set.seed(19950521)
+RNGkind("L'Ecuyer-CMRG")
+set.seed(20220812)
+parallel::mc.reset.stream()
 ```
 
 In most cases you will just need the function **find_critical_pos** which will  give you the critical point of stability for your specific parameters.
 
-Let us reproduce Schönbrodt and Perugini's quite famous and oft-cited table of the critical points of stability for a precision of 0.1. We reduce the number of studies to 10k and use multicore support (only works under GNU/Linux) so that it runs fairly quickly.
+Let us reproduce Schönbrodt and Perugini's quite famous and oft-cited table of the critical points of stability for a precision of 0.1. We set the number of studies to 100k and use multicore support (only works under GNU/Linux) so that it runs fairly quickly.
 
 ```{r sim1, message=TRUE, warning=TRUE, paged.print=TRUE}
 n_cores <- parallel::detectCores()
 find_critical_pos(rho = seq(.1, .7, .1), sample_size_max = 1e3,
-                  n_studies = 10e3, n_cores = n_cores)
+                  n_studies = 1e5, n_cores = n_cores)
 ```
 
 The results are very close to Schönbrodt and Perugini's table (see https://github.com/nicebread/corEvol). Note that a warning is shown, because in some simulations the corridor of stability was not reached. As long as this number is low, this should not affect the estimates much. But if you want to get more accurate estimates, then increase the maximum sample size.
@@ -70,7 +71,7 @@ If you want to dig deeper, you can have a look at the functions that *find_criti
 pop <- create_pop(0.5, 1e6)
 pos <- simulate_pos(x_pop = pop[,1],
                     y_pop = pop[,2],
-                    n_studies = 1e4,
+                    n_studies = 1e5,
                     sample_size_min = 20,
                     sample_size_max = 1e3,
                     replace = T,
@@ -94,11 +95,12 @@ I thought the best solution is is to directly parallelize in C++. I tried to do 
 
 My intermediate solution was quite simple and pragmatic: to use *futures*. I divided the number of studies by the available cores $n$, then started $n-1$ simulations via futures in a multisession plan. Meanwhile the main R process also started a simulation, which showed a progress bar in C++. All simulations ended at approximately the same time, the progress bar finished and the futures resolved. The points of stability were combined and the rest of the program worked as for the singlethreaded version.
 
-Unfortunately this solution did not bring any substantial speed benefits. Since version 0.5.0 I switched to the parallel package and pbapply. This means there is no multicore support for Windows but the implementation is simple and shows speed benefits when the number of studies or the maximum sample size is large.
+Unfortunately this solution did not bring any substantial speed benefits. Since version 0.5.0 I switched to the parallel package and pbmclapply. This means there is no multicore support for Windows but the implementation is simple and shows clear speed benefits.
 
-For small simulations the benefits are negligible because fastpos is already quite fast and the overhead of sharing work is hard to compensate:
+For small simulations there is no speed benefit because fastpos is already too fast:
 
 ```{r parallel1, message=FALSE, warning=FALSE}
+n_cores <- parallel::detectCores()
 onecore <- function() {
   find_critical_pos(0.5, n_studies = 1e4, progress = FALSE)
 }
@@ -108,14 +110,14 @@ multicore <- function() {
 microbenchmark::microbenchmark(onecore(), multicore(), times = 10)
 ```
 
-Increasing the number of studies to 100,000 results in larger gains:
+Increasing the number of studies to 1,000,000 makes the speed benefit more visible:
 
 ```{r parallel2, message=FALSE, warning=FALSE}
 onecore <- function() {
-  find_critical_pos(0.5, n_studies = 1e5, progress = FALSE)
+  find_critical_pos(0.5, n_studies = 1e6, progress = FALSE)
 }
 multicore <- function() {
-  find_critical_pos(0.5, n_studies = 1e5, n_cores = n_cores, progress = FALSE)
+  find_critical_pos(0.5, n_studies = 1e6, n_cores = n_cores, progress = FALSE)
 }
 microbenchmark::microbenchmark(onecore(), multicore(), times = 10)
 ```
@@ -124,14 +126,31 @@ The maximum sample size also affects the speed benefit:
 
 ```{r parallel3, message=FALSE, warning=FALSE}
 onecore <- function() {
-  find_critical_pos(0.5, n_studies = 1e5, sample_size_max = 5e3,
+  find_critical_pos(0.5, n_studies = 1e4, sample_size_max = 1e4,
                     progress = FALSE)
 }
 multicore <- function() {
-  find_critical_pos(0.5, n_studies = 1e5, sample_size_max = 5e3,
-                    n_cores = n_cores - 1, progress = FALSE)
+  find_critical_pos(0.5, n_studies = 1e4, sample_size_max = 1e4,
+                    n_cores = n_cores, progress = FALSE)
 }
 microbenchmark::microbenchmark(onecore(), multicore(), times = 10)
+```
+
+Using more than around 10 cores does not seem to bring additional speed benefits:
+
+```{r parallel4, message=FALSE, warning=FALSE}
+cores <- function(n_cores) {
+    bquote(find_critical_pos(0.5, n_studies = 1e5, sample_size_max = 5e3,
+                    n_cores = .(n_cores),
+                    progress = FALSE))
+}
+
+function_list <- lapply(1:n_cores, cores)
+names(function_list) <- 1:n_cores
+mb <- microbenchmark::microbenchmark(list = function_list, times = 10,
+                                     unit = "s")
+mb
+plot(mb)
 ```
 
 The test was done on a server with 32 cores. In general, the multicore support in fastpos is not perfect because the optimal split of work heavily depends on the specific parameters. In the future I hope to find a better way to implement multiple cores.
@@ -190,7 +209,8 @@ corevol <- function() {
   source("02-analyse.R")
 }
 fastpos <- function() {
-  find_critical_pos(rho = .1, sample_size_max = 1e3, n_studies = 10e3)
+  find_critical_pos(rho = .1, sample_size_max = 1e3, n_studies = 10e3,
+                    progress = FALSE)
 }
 bm <- microbenchmark(corevol = corevol(), fastpos = fastpos(), times = 10,
                      unit = "s")
