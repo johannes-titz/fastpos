@@ -30,7 +30,7 @@
     
     <a class="navbar-brand me-2" href="index.html">fastpos</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.5.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.5.1</small>
 
     
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -64,13 +64,34 @@
   </div>
 </nav><div class="container template-home">
 <div class="row">
-  <main id="main" class="col-md-9"><div class="section level1">
+  <main id="main" class="col-md-9"><ul>
+<li>
+<a href="#fastpos">fastpos</a>
+<ul>
+<li><a href="#installation">Installation</a></li>
+<li><a href="#using-fastpos">Using <em>fastpos</em></a></li>
+<li><a href="#parallelization">Parallelization</a></li>
+<li><a href="#how-fast-is-fastpos">How fast is <em>fastpos</em>?</a></li>
+<li>
+<a href="#faq">FAQ</a>
+<ul>
+<li><a href="#what-does-fastpos-do-if-the-corridor-of-stability-is-not-reached-for-a-simulation-study">What does <em>fastpos</em> do if the corridor of stability is not reached for a simulation study?</a></li>
+<li><a href="#why-does-fastpos-produce-different-estimates-to-corevol">Why does <em>fastpos</em> produce different estimates to <em>corEvol</em>?</a></li>
+</ul>
+</li>
+<li><a href="#issues-and-support">Issues and Support</a></li>
+<li><a href="#contributing">Contributing</a></li>
+<li><a href="#references">References</a></li>
+</ul>
+</li>
+</ul>
+<!-- README.md is generated from README.Rmd. Please edit that file --><div class="section level1">
 <div class="page-header"><h1 id="fastpos">fastpos<a class="anchor" aria-label="anchor" href="#fastpos"></a>
 </h1></div>
 <!-- badges: start -->
 
 <p>The R package <em>fastpos</em> provides a fast algorithm to calculate the required sample size for a Pearson correlation to stabilize within a sequential framework (Schönbrodt &amp; Perugini, 2013, 2018). Basically, one wants to find the sample size at which one can be sure that <img src="https://latex.codecogs.com/png.image?%5Cdpi%7B110%7D&amp;space;%5Cbg_white&amp;space;1-%5Calpha" title="1-\alpha" alt="1-\alpha"> percent of many studies will fall into a specified corridor of stability around an assumed population correlation and stay inside that corridor if more participants are added to the study. For instance, find out <em>how many</em> participants per study are required so that, out of 100k studies, 90% would fall into the region between .4 to .6 (a Pearson correlation) and not leave this region again when more participants are added (under the assumption that the population correlation is .5). This sample size is also referred to as the <em>critical point of stability</em> for the specific parameters.</p>
-<p>This approach is related to the AO-method of sample size planning (e.g. Algina &amp; Olejnik, 2003) and as such can be seen as an alternative to power analysis. Unlike AO, the concept of <em>stability</em> incorporates the idea of sequentially adding participants to a study. Although the approach is young, it has already attracted a lot of interest in the psychological research community, which is evident in over 800 citations of the original publication (Schönbrodt &amp; Perugini, 2013). Still, to date, there exists no easy way to use the stability approach for individual sample size planning because there is no analytical solution to the problem and a simulation approach is computationally expensive with <img src="https://latex.codecogs.com/png.image?%5Cdpi%7B110%7D&amp;space;%5Cbg_white&amp;space;%5Cmathcal%7BO%7D%28n%5E2%29" title="\mathcal{O}(n^2)" alt="\mathcal{O}(n^2)">. The presented package overcomes this limitation by speeding up the calculation of correlations and achieving <img src="https://latex.codecogs.com/png.image?%5Cdpi%7B110%7D&amp;space;%5Cbg_white&amp;space;%5Cmathcal%7BO%7D%28n%29" title="\mathcal{O}(n)" alt="\mathcal{O}(n)">. For typical parameters, the theoretical speedup should be at least around a factor of 250. An empirical benchmark for a typical scenario even shows a speedup of about 400, paving the way for a wider usage of the <em>stability</em> approach.</p>
+<p>This approach is related to the AO-method of sample size planning (e.g. Algina &amp; Olejnik, 2003) and as such can be seen as an alternative to power analysis. Unlike AO, the concept of <em>stability</em> incorporates the idea of sequentially adding participants to a study. Although the approach is young, it has already attracted a lot of interest in the psychological research community, which is evident in over 800 citations of the original publication (Schönbrodt &amp; Perugini, 2013). Still, to date, there exists no easy way to use the stability approach for individual sample size planning because there is no analytical solution to the problem and a simulation approach is computationally expensive with <img src="https://latex.codecogs.com/png.image?%5Cdpi%7B110%7D&amp;space;%5Cbg_white&amp;space;%5Cmathcal%7BO%7D%28n%5E2%29" title="\mathcal{O}(n^2)" alt="\mathcal{O}(n^2)">. The presented package overcomes this limitation by speeding up the calculation of correlations and achieving <img src="https://latex.codecogs.com/png.image?%5Cdpi%7B110%7D&amp;space;%5Cbg_white&amp;space;%5Cmathcal%7BO%7D%28n%29" title="\mathcal{O}(n)" alt="\mathcal{O}(n)">. For typical parameters, the theoretical speedup should be at least around a factor of 250. An empirical benchmark for a typical scenario even shows a speedup of about 460, paving the way for a wider usage of the <em>stability</em> approach.</p>
 <div class="section level2">
 <h2 id="installation">Installation<a class="anchor" aria-label="anchor" href="#installation"></a>
 </h2>
@@ -88,39 +109,41 @@
 <p>Since you have found this page, I assume you either want to (1) calculate the critical point of stability for your own study or (2) explore the method in general. If this is the case, read on and you should find what you are looking for. Let us first load the package and set a seed for reproducibility:</p>
 <div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/johannes-titz/fastpos" class="external-link">fastpos</a></span><span class="op">)</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/Random.html" class="external-link">set.seed</a></span><span class="op">(</span><span class="fl">19950521</span><span class="op">)</span></span></code></pre></div>
+<span><span class="fu"><a href="https://rdrr.io/r/base/Random.html" class="external-link">RNGkind</a></span><span class="op">(</span><span class="st">"L'Ecuyer-CMRG"</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/Random.html" class="external-link">set.seed</a></span><span class="op">(</span><span class="fl">20220812</span><span class="op">)</span></span>
+<span><span class="fu">parallel</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/r/parallel/RngStream.html" class="external-link">mc.reset.stream</a></span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
 <p>In most cases you will just need the function <strong>find_critical_pos</strong> which will give you the critical point of stability for your specific parameters.</p>
-<p>Let us reproduce Schönbrodt and Perugini’s quite famous and oft-cited table of the critical points of stability for a precision of 0.1. We reduce the number of studies to 10k and use multicore support (only works under GNU/Linux) so that it runs fairly quickly.</p>
+<p>Let us reproduce Schönbrodt and Perugini’s quite famous and oft-cited table of the critical points of stability for a precision of 0.1. We set the number of studies to 100k and use multicore support (only works under GNU/Linux) so that it runs fairly quickly.</p>
 <div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">n_cores</span> <span class="op">&lt;-</span> <span class="fu">parallel</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/r/parallel/detectCores.html" class="external-link">detectCores</a></span><span class="op">(</span><span class="op">)</span> <span class="op">-</span> <span class="fl">1</span></span>
+<code class="sourceCode R"><span><span class="va">n_cores</span> <span class="op">&lt;-</span> <span class="fu">parallel</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/r/parallel/detectCores.html" class="external-link">detectCores</a></span><span class="op">(</span><span class="op">)</span></span>
 <span><span class="fu"><a href="reference/find_critical_pos.html">find_critical_pos</a></span><span class="op">(</span>rho <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/seq.html" class="external-link">seq</a></span><span class="op">(</span><span class="fl">.1</span>, <span class="fl">.7</span>, <span class="fl">.1</span><span class="op">)</span>, sample_size_max <span class="op">=</span> <span class="fl">1e3</span>,</span>
-<span>                  n_studies <span class="op">=</span> <span class="fl">10e3</span>, n_cores <span class="op">=</span> <span class="va">n_cores</span><span class="op">)</span></span>
-<span><span class="co">#&gt; Warning in find_critical_pos(rho = seq(0.1, 0.7, 0.1), sample_size_max = 1000, : 33 simulation[s] did not reach the corridor of</span></span>
-<span><span class="co">#&gt;             stability.</span></span>
+<span>                  n_studies <span class="op">=</span> <span class="fl">1e5</span>, n_cores <span class="op">=</span> <span class="va">n_cores</span><span class="op">)</span></span>
+<span><span class="co">#&gt; Warning in find_critical_pos(rho = seq(0.1, 0.7, 0.1), sample_size_max = 1000, : </span></span>
+<span><span class="co">#&gt; 448 simulation[s] did not reach the corridor of stability.</span></span>
 <span><span class="co">#&gt; Increase sample_size_max and rerun the simulation.</span></span>
 <span><span class="co">#&gt;   rho_pop pos.80% pos.90% pos.95% sample_size_min sample_size_max lower_limit</span></span>
-<span><span class="co">#&gt; 1     0.1     254   363.0  477.00              20            1000         0.0</span></span>
-<span><span class="co">#&gt; 2     0.2     241   341.0  452.05              20            1000         0.1</span></span>
-<span><span class="co">#&gt; 3     0.3     214   307.1  406.00              20            1000         0.2</span></span>
-<span><span class="co">#&gt; 4     0.4     180   262.0  347.00              20            1000         0.3</span></span>
-<span><span class="co">#&gt; 5     0.5     144   209.0  270.00              20            1000         0.4</span></span>
-<span><span class="co">#&gt; 6     0.6     105   154.0  203.00              20            1000         0.5</span></span>
-<span><span class="co">#&gt; 7     0.7      65    95.1  126.00              20            1000         0.6</span></span>
+<span><span class="co">#&gt; 1     0.1   257.0     362     478              20            1000         0.0</span></span>
+<span><span class="co">#&gt; 2     0.2   244.2     355     467              20            1000         0.1</span></span>
+<span><span class="co">#&gt; 3     0.3   213.0     306     403              20            1000         0.2</span></span>
+<span><span class="co">#&gt; 4     0.4   182.0     265     352              20            1000         0.3</span></span>
+<span><span class="co">#&gt; 5     0.5   142.0     217     288              20            1000         0.4</span></span>
+<span><span class="co">#&gt; 6     0.6   108.0     159     209              20            1000         0.5</span></span>
+<span><span class="co">#&gt; 7     0.7    64.0     100     134              20            1000         0.6</span></span>
 <span><span class="co">#&gt;   upper_limit n_studies n_not_breached precision_absolute precision_relative</span></span>
-<span><span class="co">#&gt; 1         0.2     10000             11                0.1                 NA</span></span>
-<span><span class="co">#&gt; 2         0.3     10000             13                0.1                 NA</span></span>
-<span><span class="co">#&gt; 3         0.4     10000              7                0.1                 NA</span></span>
-<span><span class="co">#&gt; 4         0.5     10000              2                0.1                 NA</span></span>
-<span><span class="co">#&gt; 5         0.6     10000              0                0.1                 NA</span></span>
-<span><span class="co">#&gt; 6         0.7     10000              0                0.1                 NA</span></span>
-<span><span class="co">#&gt; 7         0.8     10000              0                0.1                 NA</span></span></code></pre></div>
+<span><span class="co">#&gt; 1         0.2     1e+05            192                0.1                 NA</span></span>
+<span><span class="co">#&gt; 2         0.3     1e+05            192                0.1                 NA</span></span>
+<span><span class="co">#&gt; 3         0.4     1e+05              0                0.1                 NA</span></span>
+<span><span class="co">#&gt; 4         0.5     1e+05             64                0.1                 NA</span></span>
+<span><span class="co">#&gt; 5         0.6     1e+05              0                0.1                 NA</span></span>
+<span><span class="co">#&gt; 6         0.7     1e+05              0                0.1                 NA</span></span>
+<span><span class="co">#&gt; 7         0.8     1e+05              0                0.1                 NA</span></span></code></pre></div>
 <p>The results are very close to Schönbrodt and Perugini’s table (see <a href="https://github.com/nicebread/corEvol" class="external-link uri">https://github.com/nicebread/corEvol</a>). Note that a warning is shown, because in some simulations the corridor of stability was not reached. As long as this number is low, this should not affect the estimates much. But if you want to get more accurate estimates, then increase the maximum sample size.</p>
 <p>If you want to dig deeper, you can have a look at the functions that <em>find_critical_pos</em> builds upon. <strong>simulate_pos</strong> is the workhorse of the package. It calls a C++ function to calculate correlations sequentially and it does this pretty quickly (but you know that already, right?). A rawish approach would be to create a population with <strong>create_pop</strong> and pass it to <strong>simulate_pos</strong>:</p>
 <div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">pop</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/create_pop.html">create_pop</a></span><span class="op">(</span><span class="fl">0.5</span>, <span class="fl">1e6</span><span class="op">)</span></span>
 <span><span class="va">pos</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/simulate_pos.html">simulate_pos</a></span><span class="op">(</span>x_pop <span class="op">=</span> <span class="va">pop</span><span class="op">[</span>,<span class="fl">1</span><span class="op">]</span>,</span>
 <span>                    y_pop <span class="op">=</span> <span class="va">pop</span><span class="op">[</span>,<span class="fl">2</span><span class="op">]</span>,</span>
-<span>                    n_studies <span class="op">=</span> <span class="fl">1e4</span>,</span>
+<span>                    n_studies <span class="op">=</span> <span class="fl">1e5</span>,</span>
 <span>                    sample_size_min <span class="op">=</span> <span class="fl">20</span>,</span>
 <span>                    sample_size_max <span class="op">=</span> <span class="fl">1e3</span>,</span>
 <span>                    replace <span class="op">=</span> <span class="cn">T</span>,</span>
@@ -132,8 +155,8 @@
 <p><img src="reference/figures/README-sim2-1.png" width="100%"></p>
 <div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/stats/quantile.html" class="external-link">quantile</a></span><span class="op">(</span><span class="va">pos</span>, <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">.8</span>, <span class="fl">.9</span>, <span class="fl">.95</span><span class="op">)</span>, na.rm <span class="op">=</span> <span class="cn">T</span><span class="op">)</span></span>
-<span><span class="co">#&gt;   80%   90%   95% </span></span>
-<span><span class="co">#&gt; 142.0 207.0 274.1</span></span></code></pre></div>
+<span><span class="co">#&gt; 80% 90% 95% </span></span>
+<span><span class="co">#&gt; 144 208 276</span></span></code></pre></div>
 <p>Note that no warning message appears if the corridor is not reached, but instead an NA value is returned. Pay careful attention if you work with this function, and adjust the maximum sample size as needed.</p>
 <p><strong>create_pop</strong> creates the population matrix by using a method described on SO (<a href="https://stats.stackexchange.com/questions/15011/generate-a-random-variable-with-a-defined-correlation-to-an-existing-variables/15040#15040" class="external-link uri">https://stats.stackexchange.com/questions/15011/generate-a-random-variable-with-a-defined-correlation-to-an-existing-variables/15040#15040</a>). This is a much simpler way than Schönbrodt and Perugini’s approach, but the results do not seem to differ. If you are interested in how population parameters (e.g. skewness) affect the point of stability, you should instead refer to the population generating functions in Schönbrodt and Perugini’s work.</p>
 </div>
@@ -141,23 +164,101 @@
 <h2 id="parallelization">Parallelization<a class="anchor" aria-label="anchor" href="#parallelization"></a>
 </h2>
 <p>Since version 0.4.0 <em>fastpos</em> supports multiple cores. My first attempts to implement this were quite unsuccessful because of several reasons: (1) Higher-level parallelism in R makes it difficult to show progress in C++, which is where the important and time-demanding calculations happen (2) some parallelizing solutions do not work on all operating systems (e.g. mcpbapply) (3) overhead can be quite large, especially for a small number of simulation runs.</p>
-<p>I thought the best solution is is to directly parallelize in C++. I tried to do it with <em>RcppThread</em>, but in the end this was even slower than singlethreading. I assume that a more experienced C++ programmer could make it work but to me parallelizing in C++ feels a bit like torture.</p>
+<p>I thought the best solution is is to directly parallelize in C++. I tried to do it with <em>RcppThread</em>, but in the end this was even slower than singlethreading. Maybe the overhead of setting up multiple threads outweighs sharing the work.</p>
 <p>My intermediate solution was quite simple and pragmatic: to use <em>futures</em>. I divided the number of studies by the available cores <img src="https://latex.codecogs.com/png.image?%5Cdpi%7B110%7D&amp;space;%5Cbg_white&amp;space;n" title="n" alt="n">, then started <img src="https://latex.codecogs.com/png.image?%5Cdpi%7B110%7D&amp;space;%5Cbg_white&amp;space;n-1" title="n-1" alt="n-1"> simulations via futures in a multisession plan. Meanwhile the main R process also started a simulation, which showed a progress bar in C++. All simulations ended at approximately the same time, the progress bar finished and the futures resolved. The points of stability were combined and the rest of the program worked as for the singlethreaded version.</p>
-<p>Unfortunately this solution did not bring any substantial speed benefits. Since version 0.5.0 I switched to the parallel package and pbapply. This means there is no multicore support for Windows but the implementation is simple and shows substantial speed benefits.</p>
-<p>Even for small simulations these benefits are clearly visible:</p>
+<p>Unfortunately this solution did not bring any substantial speed benefits. Since version 0.5.0 I switched to the parallel package and pbmclapply. This means there is no multicore support for Windows but the implementation is simple and shows clear speed benefits.</p>
+<p>For small simulations there is no speed benefit because fastpos is already too fast:</p>
 <div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">onecore</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="op">)</span> <span class="op">{</span></span>
-<span>  <span class="fu"><a href="reference/find_critical_pos.html">find_critical_pos</a></span><span class="op">(</span><span class="fl">0.5</span><span class="op">)</span></span>
+<code class="sourceCode R"><span><span class="va">n_cores</span> <span class="op">&lt;-</span> <span class="fu">parallel</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/r/parallel/detectCores.html" class="external-link">detectCores</a></span><span class="op">(</span><span class="op">)</span></span>
+<span><span class="va">onecore</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="op">)</span> <span class="op">{</span></span>
+<span>  <span class="fu"><a href="reference/find_critical_pos.html">find_critical_pos</a></span><span class="op">(</span><span class="fl">0.5</span>, n_studies <span class="op">=</span> <span class="fl">1e4</span>, progress <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span>
 <span><span class="op">}</span></span>
 <span><span class="va">multicore</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="op">)</span> <span class="op">{</span></span>
-<span>  <span class="fu"><a href="reference/find_critical_pos.html">find_critical_pos</a></span><span class="op">(</span><span class="fl">0.5</span>, n_cores <span class="op">=</span> <span class="va">n_cores</span><span class="op">)</span></span>
+<span>  <span class="fu"><a href="reference/find_critical_pos.html">find_critical_pos</a></span><span class="op">(</span><span class="fl">0.5</span>, n_studies <span class="op">=</span> <span class="fl">1e4</span>, n_cores <span class="op">=</span> <span class="va">n_cores</span>, progress <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span>
+<span><span class="op">}</span></span>
+<span><span class="fu">microbenchmark</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/microbenchmark/man/microbenchmark.html" class="external-link">microbenchmark</a></span><span class="op">(</span><span class="fu">onecore</span><span class="op">(</span><span class="op">)</span>, <span class="fu">multicore</span><span class="op">(</span><span class="op">)</span>, times <span class="op">=</span> <span class="fl">10</span><span class="op">)</span></span>
+<span><span class="co">#&gt; Unit: milliseconds</span></span>
+<span><span class="co">#&gt;         expr      min       lq     mean   median       uq      max neval</span></span>
+<span><span class="co">#&gt;    onecore() 790.5424 806.0623 880.9228 898.5692 914.1386 995.4131    10</span></span>
+<span><span class="co">#&gt;  multicore() 492.5743 507.3975 532.6609 519.9019 551.4526 617.7952    10</span></span></code></pre></div>
+<p>Increasing the number of studies to 1,000,000 makes the speed benefit more visible:</p>
+<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">onecore</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="op">)</span> <span class="op">{</span></span>
+<span>  <span class="fu"><a href="reference/find_critical_pos.html">find_critical_pos</a></span><span class="op">(</span><span class="fl">0.5</span>, n_studies <span class="op">=</span> <span class="fl">1e6</span>, progress <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span>
+<span><span class="op">}</span></span>
+<span><span class="va">multicore</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="op">)</span> <span class="op">{</span></span>
+<span>  <span class="fu"><a href="reference/find_critical_pos.html">find_critical_pos</a></span><span class="op">(</span><span class="fl">0.5</span>, n_studies <span class="op">=</span> <span class="fl">1e6</span>, n_cores <span class="op">=</span> <span class="va">n_cores</span>, progress <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span>
 <span><span class="op">}</span></span>
 <span><span class="fu">microbenchmark</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/microbenchmark/man/microbenchmark.html" class="external-link">microbenchmark</a></span><span class="op">(</span><span class="fu">onecore</span><span class="op">(</span><span class="op">)</span>, <span class="fu">multicore</span><span class="op">(</span><span class="op">)</span>, times <span class="op">=</span> <span class="fl">10</span><span class="op">)</span></span>
 <span><span class="co">#&gt; Unit: seconds</span></span>
-<span><span class="co">#&gt;         expr       min        lq      mean    median        uq      max neval</span></span>
-<span><span class="co">#&gt;    onecore() 26.442229 26.520269 27.271985 27.355036 27.806570 28.42687    10</span></span>
-<span><span class="co">#&gt;  multicore()  2.256679  2.384302  2.550777  2.486456  2.522117  3.05895    10</span></span></code></pre></div>
-<p>The test was done on a server with 32 cores, but only 31 cores were used.</p>
+<span><span class="co">#&gt;         expr       min        lq     mean   median       uq      max neval</span></span>
+<span><span class="co">#&gt;    onecore() 57.639320 58.015838 58.85051 58.97313 59.24430 60.16749    10</span></span>
+<span><span class="co">#&gt;  multicore()  9.254999  9.753195 11.80759 10.91989 11.91047 18.94043    10</span></span></code></pre></div>
+<p>The maximum sample size also affects the speed benefit:</p>
+<div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">onecore</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="op">)</span> <span class="op">{</span></span>
+<span>  <span class="fu"><a href="reference/find_critical_pos.html">find_critical_pos</a></span><span class="op">(</span><span class="fl">0.5</span>, n_studies <span class="op">=</span> <span class="fl">1e4</span>, sample_size_max <span class="op">=</span> <span class="fl">1e4</span>,</span>
+<span>                    progress <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span>
+<span><span class="op">}</span></span>
+<span><span class="va">multicore</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="op">)</span> <span class="op">{</span></span>
+<span>  <span class="fu"><a href="reference/find_critical_pos.html">find_critical_pos</a></span><span class="op">(</span><span class="fl">0.5</span>, n_studies <span class="op">=</span> <span class="fl">1e4</span>, sample_size_max <span class="op">=</span> <span class="fl">1e4</span>,</span>
+<span>                    n_cores <span class="op">=</span> <span class="va">n_cores</span>, progress <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span>
+<span><span class="op">}</span></span>
+<span><span class="fu">microbenchmark</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/microbenchmark/man/microbenchmark.html" class="external-link">microbenchmark</a></span><span class="op">(</span><span class="fu">onecore</span><span class="op">(</span><span class="op">)</span>, <span class="fu">multicore</span><span class="op">(</span><span class="op">)</span>, times <span class="op">=</span> <span class="fl">10</span><span class="op">)</span></span>
+<span><span class="co">#&gt; Unit: seconds</span></span>
+<span><span class="co">#&gt;         expr      min       lq     mean   median       uq      max neval</span></span>
+<span><span class="co">#&gt;    onecore() 5.578969 5.670123 5.740891 5.733023 5.820454 5.971168    10</span></span>
+<span><span class="co">#&gt;  multicore() 1.387514 1.411387 1.660138 1.444922 2.142137 2.184948    10</span></span></code></pre></div>
+<p>Using more than around 10 cores does not seem to bring additional speed benefits:</p>
+<div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">cores</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">n_cores</span><span class="op">)</span> <span class="op">{</span></span>
+<span>    <span class="fu"><a href="https://rdrr.io/r/base/bquote.html" class="external-link">bquote</a></span><span class="op">(</span><span class="fu"><a href="reference/find_critical_pos.html">find_critical_pos</a></span><span class="op">(</span><span class="fl">0.5</span>, n_studies <span class="op">=</span> <span class="fl">1e5</span>, sample_size_max <span class="op">=</span> <span class="fl">5e3</span>,</span>
+<span>                    n_cores <span class="op">=</span> <span class="fu">.</span><span class="op">(</span><span class="va">n_cores</span><span class="op">)</span>,</span>
+<span>                    progress <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="op">}</span></span>
+<span></span>
+<span><span class="va">function_list</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/lapply.html" class="external-link">lapply</a></span><span class="op">(</span><span class="fl">1</span><span class="op">:</span><span class="va">n_cores</span>, <span class="va">cores</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/names.html" class="external-link">names</a></span><span class="op">(</span><span class="va">function_list</span><span class="op">)</span> <span class="op">&lt;-</span> <span class="fl">1</span><span class="op">:</span><span class="va">n_cores</span></span>
+<span><span class="va">mb</span> <span class="op">&lt;-</span> <span class="fu">microbenchmark</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/microbenchmark/man/microbenchmark.html" class="external-link">microbenchmark</a></span><span class="op">(</span>list <span class="op">=</span> <span class="va">function_list</span>, times <span class="op">=</span> <span class="fl">10</span>,</span>
+<span>                                     unit <span class="op">=</span> <span class="st">"s"</span><span class="op">)</span></span>
+<span><span class="va">mb</span></span>
+<span><span class="co">#&gt; Unit: seconds</span></span>
+<span><span class="co">#&gt;  expr       min        lq      mean    median        uq       max neval</span></span>
+<span><span class="co">#&gt;     1 27.456555 27.570735 27.818499 27.745047 27.998901 28.552284    10</span></span>
+<span><span class="co">#&gt;     2 14.386780 14.762170 14.799019 14.846158 14.891730 15.063332    10</span></span>
+<span><span class="co">#&gt;     3 10.079521 10.272135 10.398187 10.449643 10.493651 10.690283    10</span></span>
+<span><span class="co">#&gt;     4  7.786282  8.043653  8.123207  8.137474  8.174227  8.430836    10</span></span>
+<span><span class="co">#&gt;     5  6.394230  6.457601  6.562601  6.559623  6.609138  6.833768    10</span></span>
+<span><span class="co">#&gt;     6  5.493741  5.529108  5.677393  5.598711  5.857732  6.020727    10</span></span>
+<span><span class="co">#&gt;     7  4.857490  4.957679  5.010991  5.000947  5.095433  5.150672    10</span></span>
+<span><span class="co">#&gt;     8  4.501819  4.587342  4.653510  4.633522  4.721233  4.805759    10</span></span>
+<span><span class="co">#&gt;     9  4.310806  4.513649  4.535217  4.531089  4.575051  4.703378    10</span></span>
+<span><span class="co">#&gt;    10  4.302939  4.430716  4.556707  4.584788  4.648966  4.776502    10</span></span>
+<span><span class="co">#&gt;    11  4.355230  4.508450  4.644879  4.641629  4.752381  5.003795    10</span></span>
+<span><span class="co">#&gt;    12  4.141649  4.423738  4.629711  4.631150  4.817210  5.073758    10</span></span>
+<span><span class="co">#&gt;    13  4.190796  4.631710  4.703205  4.683888  4.884239  4.962240    10</span></span>
+<span><span class="co">#&gt;    14  4.389556  4.602093  4.745577  4.769075  4.890196  5.188714    10</span></span>
+<span><span class="co">#&gt;    15  4.469471  4.506780  4.713059  4.686050  4.877884  5.059185    10</span></span>
+<span><span class="co">#&gt;    16  4.172919  4.647434  4.666889  4.674721  4.853175  4.959688    10</span></span>
+<span><span class="co">#&gt;    17  4.396954  4.569385  4.693250  4.604388  4.814465  5.140367    10</span></span>
+<span><span class="co">#&gt;    18  4.448788  4.735557  4.902612  4.940298  5.105664  5.359574    10</span></span>
+<span><span class="co">#&gt;    19  4.524529  4.860833  4.993857  4.930301  5.044446  5.557180    10</span></span>
+<span><span class="co">#&gt;    20  4.903637  4.956342  5.144836  5.080159  5.318339  5.487320    10</span></span>
+<span><span class="co">#&gt;    21  4.649297  4.967157  5.164920  5.219511  5.281292  5.579557    10</span></span>
+<span><span class="co">#&gt;    22  4.590055  4.900174  5.218636  5.212350  5.616280  5.841419    10</span></span>
+<span><span class="co">#&gt;    23  4.735541  5.040456  5.291030  5.239354  5.659753  5.688474    10</span></span>
+<span><span class="co">#&gt;    24  4.634694  4.751584  5.039350  5.088603  5.243414  5.608231    10</span></span>
+<span><span class="co">#&gt;    25  4.832792  5.021327  5.216380  5.202682  5.397915  5.566497    10</span></span>
+<span><span class="co">#&gt;    26  4.510734  4.954355  5.111006  5.107665  5.315212  5.908580    10</span></span>
+<span><span class="co">#&gt;    27  5.085392  5.151006  5.395888  5.369852  5.663524  5.772946    10</span></span>
+<span><span class="co">#&gt;    28  4.883048  5.207972  5.294213  5.271934  5.550639  5.631980    10</span></span>
+<span><span class="co">#&gt;    29  4.838274  5.086868  5.431193  5.409469  5.821201  5.960367    10</span></span>
+<span><span class="co">#&gt;    30  4.970278  5.046102  5.434072  5.480559  5.805406  6.055113    10</span></span>
+<span><span class="co">#&gt;    31  4.925469  5.105361  5.487184  5.509620  5.662650  6.186354    10</span></span>
+<span><span class="co">#&gt;    32  5.014134  5.193149  5.376090  5.405113  5.561297  5.659123    10</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">mb</span><span class="op">)</span></span></code></pre></div>
+<p><img src="reference/figures/README-parallel4-1.png" width="100%"></p>
+<p>The test was done on a server with 32 cores. In general, the multicore support in fastpos is not perfect because the optimal split of work heavily depends on the specific parameters. In the future I hope to find a better way to implement multiple cores.</p>
 </div>
 <div class="section level2">
 <h2 id="how-fast-is-fastpos">How fast is <em>fastpos</em>?<a class="anchor" aria-label="anchor" href="#how-fast-is-fastpos"></a>
@@ -182,10 +283,10 @@
 <p>For the typically used <img src="https://latex.codecogs.com/png.image?%5Cdpi%7B110%7D&amp;space;%5Cbg_white&amp;space;n_%5Cmathrm%7Bmax%7D" title="n_\mathrm{max}" alt="n_\mathrm{max}"> of 1000 and <img src="https://latex.codecogs.com/png.image?%5Cdpi%7B110%7D&amp;space;%5Cbg_white&amp;space;n_%5Cmathrm%7Bmin%7D" title="n_\mathrm{min}" alt="n_\mathrm{min}"> of 20, we can expect a speedup of about 250. This is only an approximation for several reasons. First, one can stop the process when the corridor is reached, which is done in <em>fastpos</em> but not in <em>corEvol</em>. Second, the main function of <em>fastpos</em> was written in C++ (via <em>Rcpp</em>), which is much faster than R. At the same time, the algorithms involve many more steps than just calculating correlations. For instance, setting up the population with a specific <img src="https://latex.codecogs.com/png.image?%5Cdpi%7B110%7D&amp;space;%5Cbg_white&amp;space;%5Crho" title="\rho" alt="\rho"> takes some time since it usually consists of a million value pairs. The interface functions to setup the simulations also play an important role. Obviously, there is a lower time limit that cannot be beat. Thus, it is necessary to study the speed benefit empirically.</p>
 <p>The theoretical difference is so big that it should suffice to give a rough benchmark for which the following parameters were chosen: rho = .1, sample_size_max = 1000, sample_size_min = 20, n_studies = 10000.</p>
 <p>Note that <em>corEvol</em> was written as a script for a simulation study and thus cannot be simply called via a function. Furthermore, a simulation run takes a lot of time and thus it is not practical to run it too many times. If you want to experiment with the benchmark, I have forked the original <em>corEvol</em> repository and made a benchmark branch (note that this will only work on GNU/Linux, since here I am using git through the bash):</p>
-<div class="sourceCode" id="cb8"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="fu">git</span> <span class="at">-C</span> corEvol pull <span class="kw">||</span> <span class="fu">git</span> clone <span class="at">--single-branch</span> <span class="at">--branch</span> benchmark <span class="dt">\</span></span>
-<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a>  https://github.com/johannes-titz/corEvol</span></code></pre></div>
+<div class="sourceCode" id="cb11"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="fu">git</span> <span class="at">-C</span> corEvol pull <span class="kw">||</span> <span class="fu">git</span> clone <span class="at">--single-branch</span> <span class="at">--branch</span> benchmark <span class="dt">\</span></span>
+<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a>  https://github.com/johannes-titz/corEvol</span></code></pre></div>
 <p>For <em>corEvol</em>, two files are “sourced” for the benchmark. The first file generates the simulations and the second is for calculating the critical point of stability. I turned off all messages produced by these source files.</p>
-<div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/joshuaulrich/microbenchmark/" class="external-link">microbenchmark</a></span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/getwd.html" class="external-link">setwd</a></span><span class="op">(</span><span class="st">"corEvol"</span><span class="op">)</span></span>
 <span><span class="va">corevol</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="op">)</span> <span class="op">{</span></span>
@@ -193,30 +294,20 @@
 <span>  <span class="kw"><a href="https://rdrr.io/r/base/source.html" class="external-link">source</a></span><span class="op">(</span><span class="st">"02-analyse.R"</span><span class="op">)</span></span>
 <span><span class="op">}</span></span>
 <span><span class="va">fastpos</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="op">)</span> <span class="op">{</span></span>
-<span>  <span class="fu"><a href="reference/find_critical_pos.html">find_critical_pos</a></span><span class="op">(</span>rho <span class="op">=</span> <span class="fl">.1</span>, sample_size_max <span class="op">=</span> <span class="fl">1e3</span>, n_studies <span class="op">=</span> <span class="fl">10e3</span><span class="op">)</span></span>
+<span>  <span class="fu"><a href="reference/find_critical_pos.html">find_critical_pos</a></span><span class="op">(</span>rho <span class="op">=</span> <span class="fl">.1</span>, sample_size_max <span class="op">=</span> <span class="fl">1e3</span>, n_studies <span class="op">=</span> <span class="fl">10e3</span>,</span>
+<span>                    progress <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span>
 <span><span class="op">}</span></span>
 <span><span class="va">bm</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/microbenchmark/man/microbenchmark.html" class="external-link">microbenchmark</a></span><span class="op">(</span>corevol <span class="op">=</span> <span class="fu">corevol</span><span class="op">(</span><span class="op">)</span>, fastpos <span class="op">=</span> <span class="fu"><a href="reference/fastpos-package.html">fastpos</a></span><span class="op">(</span><span class="op">)</span>, times <span class="op">=</span> <span class="fl">10</span>,</span>
 <span>                     unit <span class="op">=</span> <span class="st">"s"</span><span class="op">)</span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; Attache Paket: 'dplyr'</span></span>
-<span><span class="co">#&gt; Die folgenden Objekte sind maskiert von 'package:stats':</span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt;     filter, lag</span></span>
-<span><span class="co">#&gt; Die folgenden Objekte sind maskiert von 'package:base':</span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt;     intersect, setdiff, setequal, union</span></span>
-<span><span class="co">#&gt; Lade nötiges Paket: foreach</span></span>
-<span><span class="co">#&gt; Lade nötiges Paket: iterators</span></span>
-<span><span class="co">#&gt; Lade nötiges Paket: parallel</span></span>
 <span><span class="va">bm</span></span>
 <span><span class="co">#&gt; Unit: seconds</span></span>
-<span><span class="co">#&gt;     expr        min         lq       mean     median         uq        max</span></span>
-<span><span class="co">#&gt;  corevol 361.441778 362.906572 363.250371 363.234010 363.817974 364.638600</span></span>
-<span><span class="co">#&gt;  fastpos   2.711718   2.723252   2.776013   2.755461   2.832309   2.880485</span></span>
-<span><span class="co">#&gt;  neval</span></span>
-<span><span class="co">#&gt;     10</span></span>
-<span><span class="co">#&gt;     10</span></span></code></pre></div>
-<p>For the chosen parameters, <em>fastpos</em> is about 131 times faster than <em>corEvol</em>, for which there are two main reasons: (1) <em>fastpos</em> is built around a C++ function via <em>Rcpp</em> and (2) this function does not calculate every calculation from scratch, but only calculates the difference between the correlation at sample size <img src="https://latex.codecogs.com/png.image?%5Cdpi%7B110%7D&amp;space;%5Cbg_white&amp;space;n" title="n" alt="n"> and <img src="https://latex.codecogs.com/png.image?%5Cdpi%7B110%7D&amp;space;%5Cbg_white&amp;space;n-1" title="n-1" alt="n-1"> via the sum formula of the Pearson correlation (see above). There are some other factors that might play a role, but they cannot account for the large difference found. For instance, setting up a population takes quite long in <em>corEvol</em> (about 20s), but compared to the ~6 min required overall, this is only a small fraction. There are other parts of the <em>corEvol</em> code that are fated to be slow, but again, a speedup by a factor of 131 cannot be achieved by improving these parts. The presented benchmark is definitely not comprehensive, but only demonstrates that <em>fastpos</em> can be used with no significant waiting time for a typical scenario, while for <em>corEvol</em> this is not the case.</p>
+<span><span class="co">#&gt;     expr         min          lq        mean      median          uq</span></span>
+<span><span class="co">#&gt;  corevol 363.2943526 365.8412867 366.8502931 366.7658715 367.2626313</span></span>
+<span><span class="co">#&gt;  fastpos   0.7604255   0.7855696   0.8164049   0.7999461   0.8071823</span></span>
+<span><span class="co">#&gt;          max neval</span></span>
+<span><span class="co">#&gt;  371.6549927    10</span></span>
+<span><span class="co">#&gt;    0.9890917    10</span></span></code></pre></div>
+<p>For the chosen parameters, <em>fastpos</em> is about 460 times faster than <em>corEvol</em>, for which there are two main reasons: (1) <em>fastpos</em> is built around a C++ function via <em>Rcpp</em> and (2) this function does not calculate every calculation from scratch, but only calculates the difference between the correlation at sample size <img src="https://latex.codecogs.com/png.image?%5Cdpi%7B110%7D&amp;space;%5Cbg_white&amp;space;n" title="n" alt="n"> and <img src="https://latex.codecogs.com/png.image?%5Cdpi%7B110%7D&amp;space;%5Cbg_white&amp;space;n-1" title="n-1" alt="n-1"> via the sum formula of the Pearson correlation (see above). There are some other factors that might play a role, but they cannot account for the large difference found. For instance, setting up a population takes quite long in <em>corEvol</em> (about 20s), but compared to the ~6 min required overall, this is only a small fraction. There are other parts of the <em>corEvol</em> code that are fated to be slow, but again, a speedup by a factor of 460 cannot be achieved by improving these parts. The presented benchmark is definitely not comprehensive, but only demonstrates that <em>fastpos</em> can be used with no significant waiting time for a typical scenario, while for <em>corEvol</em> this is not the case.</p>
 </div>
 <div class="section level2">
 <h2 id="faq">FAQ<a class="anchor" aria-label="anchor" href="#faq"></a>
@@ -261,6 +352,7 @@ Schönbrodt, F. D., &amp; Perugini, M. (2018). Corrigendum to “At What Sample 
 </div>
 </div>
 </div>
+
   </main><aside class="col-md-3"><div class="links">
 <h2 data-toc-skip>Links</h2>
 <ul class="list-unstyled">

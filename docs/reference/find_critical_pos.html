@@ -18,7 +18,7 @@ increased further."><!-- mathjax --><script src="https://cdnjs.cloudflare.com/aj
     
     <a class="navbar-brand me-2" href="../index.html">fastpos</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.5.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.5.1</small>
 
     
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -121,7 +121,8 @@ can be used (different values for different rhos).</p></dd>
 
 
 <dt>n_cores</dt>
-<dd><p>Number of cores to use for simulation. Defaults to 1.</p></dd>
+<dd><p>Number of cores to use for simulation. Defaults to 1. Under
+Windows only 1 core is supported because forking is used.</p></dd>
 
 
 <dt>pop_size</dt>
@@ -190,13 +191,13 @@ default confidence levels.</p>
     <h2 id="ref-examples">Examples<a class="anchor" aria-label="anchor" href="#ref-examples"></a></h2>
     <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="fu">find_critical_pos</span><span class="op">(</span>rho <span class="op">=</span> <span class="fl">0.5</span>, n_studies <span class="op">=</span> <span class="fl">1e3</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   rho_pop pos.80% pos.90% pos.95% sample_size_min sample_size_max lower_limit</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 1     0.5     147   209.2   261.1              20            1000         0.4</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 1     0.5   138.2     219  274.05              20            1000         0.4</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   upper_limit n_studies n_not_breached precision_absolute precision_relative</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 1         0.6      1000              0                0.1                 NA</span>
 <span class="r-in"><span><span class="fu">find_critical_pos</span><span class="op">(</span>rho <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0.4</span>, <span class="fl">0.5</span><span class="op">)</span>, n_studies <span class="op">=</span> <span class="fl">1e3</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   rho_pop pos.80% pos.90% pos.95% sample_size_min sample_size_max lower_limit</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 1     0.4   189.2   268.1  355.15              20            1000         0.3</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 2     0.5   134.2   202.1  262.05              20            1000         0.4</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 1     0.4   169.2   255.1   337.0              20            1000         0.3</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 2     0.5   144.2   205.2   269.2              20            1000         0.4</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   upper_limit n_studies n_not_breached precision_absolute precision_relative</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 1         0.5      1000              0                0.1                 NA</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 2         0.6      1000              0                0.1                 NA</span>

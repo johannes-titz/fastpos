@@ -10,7 +10,7 @@
     
     <a class="navbar-brand me-2" href="../index.html">fastpos</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.5.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.5.1</small>
 
     
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -44,6 +44,28 @@
       <small>Source: <a href="https://github.com/johannes-titz/fastpos/blob/HEAD/NEWS.md" class="external-link"><code>NEWS.md</code></a></small>
     </div>
 
+    <div class="section level2">
+<h2 class="pkg-version" data-toc-text="0.5.1" id="fastpos-051">fastpos 0.5.1<a class="anchor" aria-label="anchor" href="#fastpos-051"></a></h2>
+<ul><li>fix problem with multicore support, now correct functions are used from pbmcapply</li>
+<li>add info in documentation and warning that on Windows only 1 core is used</li>
+<li>add toc to readme</li>
+</ul></div>
+    <div class="section level2">
+<h2 class="pkg-version" data-toc-text="0.5.0" id="fastpos-050">fastpos 0.5.0<a class="anchor" aria-label="anchor" href="#fastpos-050"></a></h2><p class="text-muted">CRAN release: 2022-08-10</p>
+<ul><li>improve multicore support, pbapply is now used to split up the calculation of points of stability; this is much faster than with futures but does not work on Windows</li>
+<li>give the option to set the corridor manually via lower_limit and upper_limit, which will override precision parameters</li>
+<li>change parameter precision to precision_absolute and precision_rel to precision_relative, if you used these parameters before, you need to change your code</li>
+<li>parameter rhos is no rho</li>
+<li>precision_relative now takes a numeric value, instead of being a logical</li>
+<li>change how corridor limits are set up, now closures are used to handle all cases</li>
+<li>several improvements in documentation, adding more details and hints</li>
+<li>several improvements in the readme, especially for the benchmarks</li>
+<li>linting the package with lintr</li>
+<li>deprecate old precision parameters (preparing for version 0.6.0) and rhos</li>
+<li>improve parameter order</li>
+<li>use scientific notation more consistently</li>
+<li>use roxygen md</li>
+</ul></div>
     <div class="section level2">
 <h2 class="pkg-version" data-toc-text="0.4.1" id="fastpos-041">fastpos 0.4.1<a class="anchor" aria-label="anchor" href="#fastpos-041"></a></h2><p class="text-muted">CRAN release: 2020-09-29</p>
 <ul><li>tests now show more information if they fail, also the tolerance for an individual deviation is higher to avoid false alarms</li>
