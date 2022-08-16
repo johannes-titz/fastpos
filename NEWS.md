@@ -1,3 +1,5 @@
+#
+
 # fastpos 0.5.1
 
 * fix problem with multicore support, now correct functions are used from pbmcapply
