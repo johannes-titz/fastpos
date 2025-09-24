@@ -40,18 +40,21 @@ using namespace Rcpp;
 // [[Rcpp::export]]
 int simulate_one_pos(NumericVector x_pop,
               NumericVector y_pop,
-              NumericVector index_pop,
+              IntegerVector index_pop,
               int sample_size_min,
               int sample_size_max,
               bool replace,
               float lower_limit,
               float upper_limit){
-
-  NumericVector index = RcppArmadillo::sample(index_pop, sample_size_max,
+  IntegerVector index(sample_size_max);
+  NumericVector X(sample_size_max);
+  NumericVector Y(sample_size_max);
+  index = RcppArmadillo::sample(index_pop, sample_size_max,
                                               replace);
 
-  NumericVector X = x_pop[index];
-  NumericVector Y = y_pop[index];
+  X = x_pop[index];
+  Y = y_pop[index];
+
   // change n to sample
   int n = sample_size_max;
 
@@ -152,7 +155,7 @@ IntegerVector simulate_pos(NumericVector x_pop,
                            bool progress){
   IntegerVector ret(n_studies);
   int npop = x_pop.size();
-  NumericVector index_pop(npop);
+  IntegerVector index_pop(npop);
   for (int i = 0; i < npop; i++){
     index_pop[i] = i;
   }
