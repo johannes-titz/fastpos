@@ -1,5 +1,8 @@
 # fastpos 0.6.0
 
+* remove restriction to cpp11
+* index_pop is an integer now
+
 # fastpos 0.5.1
 
 * fix problem with multicore support, now correct functions are used from pbmcapply
