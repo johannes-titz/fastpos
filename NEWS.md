@@ -1,3 +1,5 @@
+# fastpos (development version)
+
 # fastpos 0.6.0
 
 * remove restriction to cpp11
