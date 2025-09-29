@@ -12,7 +12,7 @@ find_critical_pos(
   sample_size_max = 1000,
   n_studies = 10000,
   n_cores = 1,
-  pop_size = 1e+06,
+  pop_size = 1000000,
   replace = TRUE,
   precision_relative = NA,
   lower_limit = NA,
